@@ -1,0 +1,3157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Motion Control Termurah — Kling v3 AI Motion Transfer</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎯</text></svg>">
+  <meta name="description" content="Bring any character to life with AI. Upload a character photo + reference video and apply motion transfer using Kling v3.">
+  
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <style>
+    /* ============================================================
+       Motion Control — Design System & Vanilla CSS
+       ============================================================ */
+    :root {
+      /* Color Tokens */
+      --bg-base:       #060810;
+      --bg-surface:    #0C0F1A;
+      --bg-elevated:   #111827;
+      --bg-card:       rgba(17, 24, 39, 0.85);
+      --bg-hover:      rgba(255, 255, 255, 0.04);
+
+      --primary:       #6366F1;
+      --primary-light: #818CF8;
+      --primary-dark:  #4F46E5;
+      --primary-glow:  rgba(99, 102, 241, 0.25);
+      --primary-glow2: rgba(99, 102, 241, 0.08);
+
+      --accent:        #A855F7;
+      --accent-light:  #C084FC;
+      --accent-glow:   rgba(168, 85, 247, 0.2);
+
+      --success:       #10B981;
+      --success-glow:  rgba(16, 185, 129, 0.15);
+      --warning:       #F59E0B;
+      --warning-glow:  rgba(245, 158, 11, 0.15);
+      --error:         #EF4444;
+      --error-glow:    rgba(239, 68, 68, 0.15);
+      --info:          #3B82F6;
+      --info-glow:     rgba(59, 130, 246, 0.15);
+
+      --text-primary:  #F8FAFC;
+      --text-secondary:#CBD5E1;
+      --text-muted:    #64748B;
+      --text-faint:    #334155;
+
+      --border:        rgba(255, 255, 255, 0.06);
+      --border-hover:  rgba(255, 255, 255, 0.12);
+      --border-active: rgba(99, 102, 241, 0.5);
+
+      /* Border Radii */
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 24px;
+      --radius-full: 9999px;
+
+      /* Shadows */
+      --shadow-sm:  0 1px 3px rgba(0,0,0,0.4);
+      --shadow-md:  0 4px 16px rgba(0,0,0,0.4);
+      --shadow-lg:  0 8px 32px rgba(0,0,0,0.5);
+      --shadow-xl:  0 16px 64px rgba(0,0,0,0.6);
+
+      /* Transitions */
+      --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+
+      /* Layout */
+      --max-width: 1280px;
+      --nav-height: 64px;
+    }
+
+    /* ── Reset & Base ───────────────────────────────────────────── */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-base);
+      color: var(--text-primary);
+      line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg-surface); }
+    ::-webkit-scrollbar-thumb { background: var(--bg-elevated); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+
+    ::selection { background: var(--primary-glow); color: var(--text-primary); }
+
+    :focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
+    }
+
+    /* ── Typography ─────────────────────────────────────────────── */
+    h1, h2, h3, h4 {
+      font-weight: 700;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+    }
+    h1 { font-size: clamp(2rem, 5vw, 3.5rem); }
+    h2 { font-size: clamp(1.5rem, 3vw, 2.25rem); }
+    h3 { font-size: clamp(1.125rem, 2vw, 1.5rem); }
+    h4 { font-size: 1.125rem; }
+    p { color: var(--text-secondary); }
+    a {
+      color: var(--primary-light);
+      text-decoration: none;
+      transition: color var(--transition-fast);
+    }
+    a:hover { color: var(--text-primary); }
+
+    /* ── Layout & Backgrounds ───────────────────────────────────── */
+    .container {
+      width: 100%;
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .page-wrapper {
+      min-height: 100vh;
+      padding-top: var(--nav-height);
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Floating Grid & Orbs */
+    .bg-grid {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background-image:
+        linear-gradient(rgba(99, 102, 241, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(99, 102, 241, 0.03) 1px, transparent 1px);
+      background-size: 48px 48px;
+    }
+
+    .bg-orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      pointer-events: none;
+      z-index: 0;
+      animation: float-orb 8s ease-in-out infinite;
+    }
+    .bg-orb-1 {
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.12) 0%, transparent 70%);
+      top: -200px; left: -200px;
+    }
+    .bg-orb-2 {
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(168, 85, 247, 0.10) 0%, transparent 70%);
+      bottom: -100px; right: -100px;
+      animation-delay: -4s;
+    }
+
+    /* ── Navbar ─────────────────────────────────────────────────── */
+    .navbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--nav-height);
+      z-index: 100;
+      background: rgba(6, 8, 16, 0.85);
+      backdrop-filter: blur(20px) saturate(1.8);
+      -webkit-backdrop-filter: blur(20px) saturate(1.8);
+      border-bottom: 1px solid var(--border);
+      transition: border-color var(--transition-base);
+    }
+    .navbar.scrolled {
+      border-bottom-color: var(--border-hover);
+    }
+    .navbar-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 100%;
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.125rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: var(--text-primary);
+    }
+    .nav-logo-icon {
+      width: 32px; height: 32px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      box-shadow: 0 0 20px var(--primary-glow);
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      list-style: none;
+    }
+    .nav-link {
+      display: flex; align-items: center; gap: 6px;
+      padding: 6px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      transition: all var(--transition-fast);
+    }
+    .nav-link:hover {
+      color: var(--text-primary);
+      background: var(--bg-hover);
+    }
+    .nav-link.active {
+      color: var(--primary-light);
+      background: var(--primary-glow2);
+      border: 1px solid var(--border);
+    }
+
+    /* Mobile Menu Dropdown */
+    .mobile-menu-dropdown {
+      position: absolute;
+      top: 100%; left: 0; right: 0;
+      background: rgba(6, 8, 16, 0.98);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 24px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      z-index: 99;
+    }
+
+    /* ── Cards & Containers ─────────────────────────────────────── */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: border-color var(--transition-base), box-shadow var(--transition-base);
+    }
+    .card:hover {
+      border-color: var(--border-hover);
+      box-shadow: var(--shadow-md);
+    }
+    .card-glow:hover {
+      border-color: var(--border-active);
+      box-shadow: 0 0 24px var(--primary-glow), var(--shadow-md);
+    }
+
+    /* ── Buttons ────────────────────────────────────────────────── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: var(--radius-md);
+      font-family: inherit;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all var(--transition-fast);
+      position: relative;
+      overflow: hidden;
+      white-space: nowrap;
+      color: var(--text-primary);
+    }
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      border-color: transparent;
+      box-shadow: 0 0 20px var(--primary-glow);
+    }
+    .btn-primary:hover {
+      background: linear-gradient(135deg, var(--primary-light), var(--primary));
+      box-shadow: 0 0 32px rgba(99, 102, 241, 0.4);
+      transform: translateY(-1px);
+    }
+    .btn-primary:active { transform: translateY(0); }
+
+    .btn-secondary {
+      background: var(--bg-elevated);
+      color: var(--text-secondary);
+      border-color: var(--border);
+    }
+    .btn-secondary:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+      border-color: var(--border-hover);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-muted);
+      border-color: transparent;
+    }
+    .btn-ghost:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--error);
+      border-color: rgba(239, 68, 68, 0.2);
+    }
+    .btn-danger:hover {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: rgba(239, 68, 68, 0.4);
+    }
+
+    .btn-success {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--success);
+      border-color: rgba(16, 185, 129, 0.2);
+    }
+    .btn-success:hover {
+      background: rgba(16, 185, 129, 0.2);
+      border-color: rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-sm { padding: 6px 12px; font-size: 0.8125rem; }
+    .btn-lg { padding: 14px 28px; font-size: 1rem; border-radius: var(--radius-lg); }
+    .btn-icon { padding: 8px; aspect-ratio: 1; border-radius: var(--radius-sm); }
+
+    /* Shimmer effect on buttons */
+    .btn-primary::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%);
+      transform: translateX(-100%);
+      transition: transform 0.6s ease;
+    }
+    .btn-primary:hover::after { transform: translateX(100%); }
+
+    /* ── Form Elements ──────────────────────────────────────────── */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .form-label {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+    .form-hint {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+    .input {
+      width: 100%;
+      padding: 11px 14px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 0.9375rem;
+      transition: all var(--transition-fast);
+      outline: none;
+    }
+    .input::placeholder { color: var(--text-muted); }
+    .input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-glow2), 0 0 12px var(--primary-glow);
+    }
+    .input:hover:not(:focus) { border-color: var(--border-hover); }
+
+    .input-password {
+      font-family: 'Courier New', monospace;
+      letter-spacing: 0.1em;
+    }
+
+    .textarea {
+      resize: vertical;
+      min-height: 100px;
+      line-height: 1.6;
+    }
+
+    /* Range Slider */
+    .range-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 6px;
+      background: var(--bg-elevated);
+      border-radius: var(--radius-full);
+      outline: none;
+      cursor: pointer;
+      border: 1px solid var(--border);
+    }
+    .range-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px; height: 18px;
+      background: linear-gradient(135deg, var(--primary-light), var(--primary));
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 0 8px var(--primary-glow), 0 2px 4px rgba(0,0,0,0.3);
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+    }
+    .range-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    /* Toggle Switch */
+    .toggle-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+    }
+    .toggle {
+      position: relative;
+      width: 44px; height: 24px;
+      flex-shrink: 0;
+    }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-track {
+      position: absolute;
+      inset: 0;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-full);
+      transition: all var(--transition-base);
+      cursor: pointer;
+    }
+    .toggle input:checked + .toggle-track {
+      background: var(--primary);
+      border-color: var(--primary);
+      box-shadow: 0 0 12px var(--primary-glow);
+    }
+    .toggle-thumb {
+      position: absolute;
+      top: 3px; left: 3px;
+      width: 16px; height: 16px;
+      background: #fff;
+      border-radius: 50%;
+      transition: transform var(--transition-base);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+      pointer-events: none;
+    }
+    .toggle input:checked ~ .toggle-thumb {
+      transform: translateX(20px);
+    }
+
+    /* ── Segment / Toggle Button Control ────────────────────────── */
+    .segment-control {
+      display: flex;
+      gap: 4px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 4px;
+    }
+    .segment-btn {
+      flex: 1;
+      padding: 8px 12px;
+      border: none;
+      border-radius: calc(var(--radius-md) - 4px);
+      font-family: inherit;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      background: transparent;
+      transition: all var(--transition-base);
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .segment-btn.active {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #fff;
+      box-shadow: 0 0 16px var(--primary-glow);
+    }
+    .segment-btn:hover:not(.active) {
+      background: var(--bg-hover);
+      color: var(--text-secondary);
+    }
+
+    /* ── Upload Zone ────────────────────────────────────────────── */
+    .upload-zone {
+      position: relative;
+      border: 2px dashed var(--border);
+      border-radius: var(--radius-lg);
+      padding: 32px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all var(--transition-base);
+      background: var(--bg-card);
+      overflow: hidden;
+      min-height: 200px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    .upload-zone:hover, .upload-zone.drag-over {
+      border-color: var(--primary);
+      background: var(--primary-glow2);
+      box-shadow: 0 0 24px var(--primary-glow);
+    }
+    .upload-zone.has-file {
+      border-color: var(--success);
+      background: var(--success-glow);
+      border-style: solid;
+    }
+    .upload-icon {
+      font-size: 2.5rem;
+      margin-bottom: 12px;
+      display: block;
+      transition: transform var(--transition-base);
+    }
+    .upload-zone:hover .upload-icon { transform: translateY(-4px) scale(1.1); }
+    .upload-title { font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
+    .upload-subtitle { font-size: 0.8125rem; color: var(--text-muted); }
+    
+    .upload-preview {
+      position: relative;
+      width: 100%;
+      max-height: 200px;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+    .upload-preview img,
+    .upload-preview video {
+      width: 100%;
+      max-height: 190px;
+      object-fit: cover;
+      border-radius: var(--radius-md);
+      display: block;
+    }
+    .upload-clear {
+      position: absolute;
+      top: 8px; right: 8px;
+      width: 28px; height: 28px;
+      background: rgba(0,0,0,0.7);
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      color: var(--text-primary);
+      font-size: 12px;
+      transition: all var(--transition-fast);
+      z-index: 2;
+    }
+    .upload-clear:hover { background: var(--error); border-color: var(--error); }
+
+    .progress-track {
+      width: 100%; height: 4px;
+      background: var(--bg-elevated);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      border-radius: var(--radius-full);
+      transition: width 0.3s ease;
+      position: relative;
+    }
+    .upload-progress-bar.style-progress-line {
+      position: absolute;
+      bottom: 0; left: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      transition: width 0.3s ease;
+    }
+
+    /* Input mode URL tabs */
+    .input-tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 4px;
+      margin-bottom: 10px;
+    }
+    .input-tab {
+      flex: 1;
+      padding: 6px 12px;
+      border-radius: calc(var(--radius-md) - 4px);
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      transition: all var(--transition-fast);
+      font-family: inherit;
+    }
+    .input-tab.active {
+      background: var(--bg-card);
+      color: var(--text-primary);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* ── Badges & Status Indicators ─────────────────────────────── */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: var(--radius-full);
+      font-size: 0.725rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .badge-created    { background: var(--bg-elevated); color: var(--text-muted); border: 1px solid var(--border); }
+    .badge-progress   { background: var(--info-glow); color: var(--info); border: 1px solid rgba(59,130,246,0.25); }
+    .badge-completed  { background: var(--success-glow); color: var(--success); border: 1px solid rgba(16,185,129,0.25); }
+    .badge-failed     { background: var(--error-glow); color: var(--error); border: 1px solid rgba(239,68,68,0.25); }
+    .badge-active     { background: var(--primary-glow2); color: var(--primary-light); border: 1px solid var(--border-active); }
+
+    .pulse-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+      animation: pulse-scale 1.5s ease-in-out infinite;
+    }
+
+    /* ── Task Grid & Task Card ──────────────────────────────────── */
+    .task-card {
+      position: relative;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      transition: all var(--transition-base);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+    }
+    .task-card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+    .task-card.status-completed { border-color: rgba(16,185,129,0.15); }
+    .task-card.status-failed    { border-color: rgba(239,68,68,0.15); }
+    .task-card.status-in-progress { border-color: rgba(59,130,246,0.15); }
+
+    .task-thumbnail {
+      position: relative;
+      width: 100%; aspect-ratio: 16/9;
+      background: var(--bg-elevated);
+      overflow: hidden;
+    }
+    .task-thumbnail img,
+    .task-thumbnail video {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .task-thumbnail-placeholder {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      height: 100%; gap: 8px;
+      color: var(--text-muted); font-size: 0.8125rem;
+    }
+    .task-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0;
+      transition: opacity var(--transition-base);
+    }
+    .task-card:hover .task-overlay { opacity: 1; }
+
+    .task-tier-badge {
+      font-size: 0.6875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 2px 7px;
+      border-radius: var(--radius-full);
+    }
+    .task-tier-pro {
+      background: var(--primary-glow2);
+      color: var(--primary-light);
+      border: 1px solid var(--border-active);
+    }
+    .task-tier-std {
+      background: var(--bg-elevated);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+    .task-info { padding: 14px; display: flex; flex-direction: column; flex-grow: 1; }
+
+    /* ── API Keys Management Card ───────────────────────────────── */
+    .api-key-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      transition: all var(--transition-base);
+    }
+    .api-key-card:hover {
+      border-color: var(--border-hover);
+      background: var(--bg-elevated);
+    }
+    .api-key-card.is-active {
+      border-color: var(--border-active);
+      background: var(--primary-glow2);
+      box-shadow: 0 0 20px var(--primary-glow);
+    }
+    .api-key-indicator {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--border);
+      flex-shrink: 0;
+      transition: all var(--transition-base);
+    }
+    .api-key-card.is-active .api-key-indicator {
+      background: var(--success);
+      box-shadow: 0 0 8px var(--success-glow);
+      animation: pulse-scale 2s ease-in-out infinite;
+    }
+    .api-key-name {
+      font-weight: 600;
+      font-size: 0.9375rem;
+      color: var(--text-primary);
+    }
+    .api-key-masked {
+      font-family: monospace;
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      letter-spacing: 0.1em;
+    }
+    .api-key-meta {
+      display: flex; gap: 12px; flex-wrap: wrap;
+      font-size: 0.75rem; color: var(--text-muted);
+    }
+    .api-key-actions {
+      display: flex; gap: 6px; margin-left: auto; flex-shrink: 0;
+      align-items: center;
+    }
+
+    /* ── Modal backdrop & popup ─────────────────────────────────── */
+    .modal-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(6, 8, 16, 0.8);
+      backdrop-filter: blur(8px);
+      z-index: 200;
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+      animation: fade-in 0.2s ease;
+    }
+    .modal {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      width: 100%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-xl), 0 0 60px var(--primary-glow);
+      animation: slide-up 0.3s ease;
+    }
+    .modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .modal-body { padding: 24px; }
+    .modal-footer {
+      display: flex; justify-content: flex-end; gap: 10px;
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── Utilities ───────────────────────────────────────────── */
+    .section-header {
+      margin-bottom: 24px;
+    }
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--text-primary);
+    }
+    .section-subtitle {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* ── Hero section ───────────────────────────────────────────── */
+    .hero {
+      position: relative;
+      text-align: center;
+      padding: 60px 24px 40px;
+      overflow: hidden;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 16px;
+      background: var(--primary-glow2);
+      border: 1px solid var(--border-active);
+      border-radius: var(--radius-full);
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--primary-light);
+      margin-bottom: 20px;
+      animation: fade-slide-down 0.6s ease;
+    }
+    .hero-title {
+      font-size: clamp(2.25rem, 5vw, 4rem);
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      background: linear-gradient(135deg, #F8FAFC 0%, #94A3B8 50%, var(--primary-light) 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 16px;
+      line-height: 1.1;
+      animation: fade-slide-down 0.6s ease 0.1s both;
+    }
+    .hero-subtitle {
+      font-size: clamp(1rem, 2vw, 1.25rem);
+      color: var(--text-muted);
+      max-width: 560px;
+      margin: 0 auto 30px;
+      line-height: 1.7;
+      animation: fade-slide-down 0.6s ease 0.2s both;
+    }
+
+    /* ── Empty states ───────────────────────────────────────────── */
+    .empty-state {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 60px 24px;
+      text-align: center;
+      gap: 16px;
+    }
+    .empty-icon { font-size: 3rem; opacity: 0.4; }
+    .empty-title { font-size: 1.125rem; font-weight: 600; color: var(--text-secondary); }
+    .empty-desc { font-size: 0.875rem; color: var(--text-muted); max-width: 360px; }
+
+    /* ── Dividers ───────────────────────────────────────────────── */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 24px 0;
+    }
+    .divider-label {
+      display: flex; align-items: center; gap: 12px;
+      margin: 20px 0;
+      font-size: 0.75rem; font-weight: 600;
+      color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em;
+    }
+    .divider-label::before, .divider-label::after {
+      content: ''; flex: 1;
+      height: 1px; background: var(--border);
+    }
+
+    /* ── Toasts notifications ───────────────────────────────────── */
+    .toast-container {
+      position: fixed;
+      bottom: 24px; right: 24px;
+      display: flex; flex-direction: column; gap: 8px;
+      z-index: 9999;
+      pointer-events: none;
+    }
+    .toast {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 18px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      min-width: 300px;
+      max-width: 400px;
+      box-shadow: var(--shadow-xl);
+      animation: slide-in-right 0.3s ease;
+      pointer-events: all;
+      backdrop-filter: blur(12px);
+    }
+    .toast-success { border-color: rgba(16, 185, 129, 0.3); }
+    .toast-error   { border-color: rgba(239, 68, 68, 0.3); }
+    .toast-info    { border-color: rgba(59, 130, 246, 0.3); }
+    .toast-icon { font-size: 1.125rem; flex-shrink: 0; }
+    .toast-text { font-size: 0.875rem; font-weight: 500; color: var(--text-primary); flex: 1; }
+
+    /* ── Animations ─────────────────────────────────────────────── */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner {
+      width: 20px; height: 20px;
+      border: 2px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    .spinner-lg { width: 40px; height: 40px; border-width: 3px; }
+
+    @keyframes pulse-scale {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.3); opacity: 0.7; }
+    }
+    @keyframes float-orb {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-20px) scale(1.02); }
+    }
+    @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes fade-slide-down {
+      from { opacity: 0; transform: translateY(-16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes slide-up {
+      from { opacity: 0; transform: translateY(24px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes slide-in-right {
+      from { opacity: 0; transform: translateX(20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes pulse-ring {
+      0% { box-shadow: 0 0 0 0 var(--primary-glow); }
+      70% { box-shadow: 0 0 0 12px transparent; }
+      100% { box-shadow: 0 0 0 0 transparent; }
+    }
+    @keyframes gradient-shift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Shifting gradient on generate button */
+    .btn-generate {
+      background: linear-gradient(135deg, var(--primary), var(--accent), var(--primary-dark));
+      background-size: 200% 200%;
+      animation: gradient-shift 4s ease infinite;
+      color: #fff;
+      font-size: 1rem;
+      padding: 16px 40px;
+      border-radius: var(--radius-xl);
+      border: none;
+      box-shadow: 0 0 30px var(--primary-glow), 0 4px 16px rgba(0,0,0,0.4);
+      width: 100%;
+      letter-spacing: 0.02em;
+    }
+    .btn-generate:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 48px rgba(99, 102, 241, 0.5), 0 8px 32px rgba(0,0,0,0.5);
+    }
+    .btn-generate:disabled {
+      animation: none;
+      background: var(--bg-elevated);
+      box-shadow: none;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .container { padding: 0 16px; }
+      .hero { padding: 40px 16px 30px; }
+      .nav-links { display: none; }
+      .modal { max-height: 95vh; }
+      .toast-container { left: 24px; }
+      .upload-grid { grid-template-columns: 1fr !important; }
+      .info-grid { grid-template-columns: 1fr !important; }
+      .about-grid { grid-template-columns: 1fr !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Floating Background Elements -->
+  <div class="bg-grid"></div>
+  <div class="bg-orb bg-orb-1"></div>
+  <div class="bg-orb bg-orb-2"></div>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar" id="app-navbar">
+    <div class="navbar-inner">
+      <a href="#/generator" class="nav-logo">
+        <div class="nav-logo-icon">🎯</div>
+        <span>Motion<span style="color: var(--primary-light);">Control</span></span>
+      </a>
+      
+      <!-- Desktop Links -->
+      <ul class="nav-links">
+        <li><a href="#/generator" class="nav-link"><span>⚡</span><span>Generator</span></a></li>
+        <li><a href="#/gallery" class="nav-link"><span>🎬</span><span>Gallery</span></a></li>
+        <li><a href="#/settings" class="nav-link"><span>⚙️</span><span>Settings</span></a></li>
+      </ul>
+
+      <!-- Mobile hamburger button -->
+      <button type="button" class="btn btn-ghost btn-icon" id="mobile-menu-btn" style="display: none; padding: 6px;">☰</button>
+    </div>
+
+    <!-- Mobile Dropdown Links -->
+    <div class="mobile-menu-dropdown" id="mobile-dropdown-menu" style="display: none;">
+      <a href="#/generator" class="nav-link"><span>⚡</span><span>Generator</span></a>
+      <a href="#/gallery" class="nav-link"><span>🎬</span><span>Gallery</span></a>
+      <a href="#/settings" class="nav-link"><span>⚙️</span><span>Settings</span></a>
+    </div>
+  </nav>
+
+  <div class="page-wrapper">
+
+    <!-- ========================================== -->
+    <!-- VIEW: GENERATOR (#/generator) -->
+    <!-- ========================================== -->
+    <div id="view-generator" class="view-section container" style="max-width: 960px; padding-bottom: 80px;">
+      
+      <!-- Hero Header -->
+      <section class="hero">
+        <div class="hero-badge">
+          <span style="animation: pulse-scale 2s ease-in-out infinite; display: inline-block;">✨</span>
+          Powered by Magnific Kling v3 Motion Control
+        </div>
+        <h1 class="hero-title">
+          Bring Any Character<br>to Life with AI
+        </h1>
+        <p class="hero-subtitle">
+          Upload a character photo + reference video.<br>
+          Our AI transfers the motion while preserving your character's appearance.
+        </p>
+
+        <!-- Features Quick Stats -->
+        <div style="display: inline-flex; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-xl); overflow: hidden; margin-bottom: 16px;">
+          <div style="padding: 12px 20px; text-align: center; border-right: 1px solid var(--border);">
+            <div style="font-size: 1rem; font-weight: 800; color: var(--primary-light);">3-30s</div>
+            <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em;">Reference Video</div>
+          </div>
+          <div style="padding: 12px 20px; text-align: center; border-right: 1px solid var(--border);">
+            <div style="font-size: 1rem; font-weight: 800; color: var(--primary-light);">Pro + Std</div>
+            <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em;">Quality Tiers</div>
+          </div>
+          <div style="padding: 12px 20px; text-align: center; border-right: 1px solid var(--border);">
+            <div style="font-size: 1rem; font-weight: 800; color: var(--primary-light);">2500</div>
+            <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em;">Prompt Chars</div>
+          </div>
+          <div style="padding: 12px 20px; text-align: center;">
+            <div style="font-size: 1rem; font-weight: 800; color: var(--primary-light);">Async</div>
+            <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em;">Processing</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Recent Task Alert Banner -->
+      <div id="generator-recent-task-banner" style="display: none; padding: 14px 20px; background: var(--success-glow); border: 1px solid rgba(16,185,129,0.25); border-radius: var(--radius-md); margin-bottom: 24px; align-items: center; gap: 12px;">
+        <span style="font-size: 1.25rem;">🎉</span>
+        <div style="flex: 1;">
+          <p style="fontWeight: 600; color: var(--success); margin: 0; font-size: 0.9375rem; font-weight: 600;">Task created successfully!</p>
+          <p style="font-size: 0.8125rem; color: var(--text-muted); margin: 2px 0 0;">
+            Task ID: <code style="font-family: monospace; color: var(--text-secondary);" id="recent-task-id-code"></code> — Polling status in background.
+          </p>
+        </div>
+        <a href="#/gallery" class="btn btn-success btn-sm">View Gallery →</a>
+      </div>
+
+      <!-- Main Generate Form Card -->
+      <div class="card card-glow" style="padding: 32px;">
+        
+        <!-- Active Key Indicator / Selector -->
+        <div style="margin-bottom: 28px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+            <label class="form-label">🔑 Active API Key</label>
+            <a href="#/settings" style="font-size: 0.8125rem; color: var(--primary-light);">Manage Keys →</a>
+          </div>
+          
+          <!-- Warning when no key -->
+          <div id="no-key-warning" style="display: none; padding: 14px 16px; background: var(--warning-glow); border: 1px solid rgba(245,158,11,0.25); border-radius: var(--radius-md); align-items: center; gap: 10px; font-size: 0.875rem; color: var(--warning);">
+            <span>⚠️</span>
+            <span>No API key configured. <a href="#/settings" style="color: var(--warning); font-weight: 600;">Add one in Settings</a> to enable generator.</span>
+          </div>
+
+          <select class="input" id="generator-active-key"></select>
+        </div>
+
+        <!-- Quality Tier Segmented Button -->
+        <div class="form-group" style="margin-bottom: 24px;">
+          <label class="form-label">🎬 Quality Tier</label>
+          <div class="segment-control">
+            <button type="button" class="segment-btn active" id="tier-btn-pro">
+              ⭐ Pro <span style="font-size: 0.7rem; opacity: 0.7; font-weight: 400;">Higher fidelity</span>
+            </button>
+            <button type="button" class="segment-btn" id="tier-btn-std">
+              ⚡ Standard <span style="font-size: 0.7rem; opacity: 0.7; font-weight: 400;">Faster & cheaper</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Upload Grid -->
+        <div class="upload-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px;">
+          <!-- Character Photo -->
+          <div class="form-group">
+            <label class="form-label">🖼️ Character Image</label>
+            <div id="image-upload-zone-container"></div>
+          </div>
+          <!-- Reference Video -->
+          <div class="form-group">
+            <label class="form-label">🎬 Reference Video</label>
+            <div id="video-upload-zone-container"></div>
+          </div>
+        </div>
+
+        <!-- Prompt Field -->
+        <div class="form-group" style="margin-bottom: 24px;">
+          <label class="form-label">
+            ✍️ Prompt <span style="color: var(--text-muted); text-transform: none; font-weight: 400;">(optional)</span>
+          </label>
+          <div style="position: relative;">
+            <textarea class="input textarea" id="generator-prompt" placeholder="Describe the motion or style you want to apply... e.g. 'Smooth dance moves, elegant and graceful' (highly recommended to guide the generation)" maxlength="2500" rows="3"></textarea>
+            <span style="position: absolute; bottom: 10px; right: 12px; font-size: 0.75rem; color: var(--text-muted);" id="prompt-counter">0/2500</span>
+          </div>
+        </div>
+
+        <!-- Advanced Settings Toggle -->
+        <button type="button" class="btn btn-ghost" id="btn-toggle-advanced" style="width: 100%; justify-content: space-between; padding: 10px 0; margin-bottom: 8px;">
+          <span style="display: flex; align-items: center; gap: 8px; font-size: 0.875rem; color: var(--text-muted); font-weight: 600;">
+            ⚙️ Advanced Settings
+          </span>
+          <span style="transition: transform 0.2s ease; color: var(--text-muted);" id="advanced-arrow">▼</span>
+        </button>
+
+        <!-- Advanced Panel (Hidden by default) -->
+        <div id="advanced-settings-panel" style="display: none; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 20px; margin-bottom: 24px; flex-direction: column; gap: 20px;">
+          
+          <!-- Character Orientation Mode -->
+          <div class="form-group">
+            <label class="form-label">Character Orientation</label>
+            <div class="segment-control">
+              <button type="button" class="segment-btn active" id="orient-btn-video">
+                🎬 Video mode <span style="font-size: 0.7rem; opacity: 0.7; font-weight: 400;">max 30s output</span>
+              </button>
+              <button type="button" class="segment-btn" id="orient-btn-image">
+                🖼️ Image mode <span style="font-size: 0.7rem; opacity: 0.7; font-weight: 400;">max 10s output</span>
+              </button>
+            </div>
+            <p class="form-hint" style="margin-top: 6px;" id="orient-hint">
+              HL: ✅ Best for complex motions like dance, gestures, full-body movements
+            </p>
+          </div>
+
+          <!-- CFG Scale Slider -->
+          <div class="form-group">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <label class="form-label">CFG Scale (Prompt Adherence)</label>
+              <span style="background: var(--primary-glow2); border: 1px solid var(--border-active); border-radius: var(--radius-full); padding: 2px 10px; font-size: 0.8125rem; font-weight: 700; color: var(--primary-light); min-width: 40px; text-align: center;" id="generator-cfg-scale-val">0.5</span>
+            </div>
+            <input type="range" class="range-slider" min="0" max="1" step="0.1" value="0.5" id="generator-cfg-scale" />
+            <div style="display: flex; justify-content: space-between; margin-top: 6px;">
+              <span style="font-size: 0.75rem; color: var(--text-muted);">0 — Creative (more natural)</span>
+              <span style="font-size: 0.75rem; color: var(--text-muted);">1 — Strict (adhere to prompt)</span>
+            </div>
+          </div>
+
+          <!-- Webhook URL input -->
+          <div class="form-group">
+            <label class="form-label">🔔 Webhook URL <span style="text-transform: none; font-weight: 400; color: var(--text-muted);">(optional)</span></label>
+            <input type="url" class="input" id="generator-webhook" placeholder="https://your-server.com/webhook" />
+            <p class="form-hint">Receive an HTTP POST notification when generation completes</p>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="button" class="btn btn-generate" id="generate-btn" disabled>
+          <span>⚡</span>
+          <span>Generate Motion Video</span>
+        </button>
+
+      </div>
+
+      <!-- Features Guide Cards -->
+      <div style="margin-top: 64px;">
+        <h2 style="text-align: center; margin-bottom: 40px; font-size: 1.5rem; font-weight: 700; background: linear-gradient(135deg, var(--text-primary), var(--text-secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+          How It Works
+        </h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+          <div class="card" style="padding: 24px; text-align: center;">
+            <div style="font-size: 2rem; margin-bottom: 12px;">🎯</div>
+            <h3 style="font-size: 1rem; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">Motion Transfer</h3>
+            <p style="font-size: 0.8125rem; color: var(--text-muted); line-height: 1.6;">Extract motion from any reference video and apply it to your character image with stunning precision.</p>
+          </div>
+          <div class="card" style="padding: 24px; text-align: center;">
+            <div style="font-size: 2rem; margin-bottom: 12px;">🎭</div>
+            <h3 style="font-size: 1rem; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">Character Preserved</h3>
+            <p style="font-size: 0.8125rem; color: var(--text-muted); line-height: 1.6;">Your character's face, clothing, and visual identity remain intact throughout the animation.</p>
+          </div>
+          <div class="card" style="padding: 24px; text-align: center;">
+            <div style="font-size: 2rem; margin-bottom: 12px;">⚡</div>
+            <h3 style="font-size: 1rem; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">Kling v3 Pro</h3>
+            <p style="font-size: 0.8125rem; color: var(--text-muted); line-height: 1.6;">Powered by the latest Kling v3 Pro/Standard models for the highest quality AI video generation.</p>
+          </div>
+          <div class="card" style="padding: 24px; text-align: center;">
+            <div style="font-size: 2rem; margin-bottom: 12px;">🔄</div>
+            <h3 style="font-size: 1rem; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">Real-time Status</h3>
+            <p style="font-size: 0.8125rem; color: var(--text-muted); line-height: 1.6;">Live background polling updates status in the gallery — no manual reload needed.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tips Section -->
+      <div class="card" style="padding: 28px; margin-top: 40px;">
+        <h3 style="font-size: 1rem; font-weight: 700; color: var(--text-primary); margin-bottom: 16px;">
+          💡 Tips for Best Results
+        </h3>
+        <div class="info-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px;">
+          <div style="display: flex; gap: 10px; align-items: flex-start;">
+            <span style="font-size: 1.125rem; flex-shrink: 0;">🖼️</span>
+            <p style="font-size: 0.8125rem; color: var(--text-secondary); margin: 0; line-height: 1.5;">Use high-resolution character images (min 300×300px) with clear lighting.</p>
+          </div>
+          <div style="display: flex; gap: 10px; align-items: flex-start;">
+            <span style="font-size: 1.125rem; flex-shrink: 0;">🎬</span>
+            <p style="font-size: 0.8125rem; color: var(--text-secondary); margin: 0; line-height: 1.5;">Choose reference videos with clear, isolated motion patterns (3–30 seconds).</p>
+          </div>
+          <div style="display: flex; gap: 10px; align-items: flex-start;">
+            <span style="font-size: 1.125rem; flex-shrink: 0;">🎯</span>
+            <p style="font-size: 0.8125rem; color: var(--text-secondary); margin: 0; line-height: 1.5;">Use "Video Mode" for active movements like dancing, walking, or full body.</p>
+          </div>
+          <div style="display: flex; gap: 10px; align-items: flex-start;">
+            <span style="font-size: 1.125rem; flex-shrink: 0;">✍️</span>
+            <p style="font-size: 0.8125rem; color: var(--text-secondary); margin: 0; line-height: 1.5;">Adding a descriptive prompt helps guide the AI in interpreting reference gestures.</p>
+          </div>
+          <div style="display: flex; gap: 10px; align-items: flex-start;">
+            <span style="font-size: 1.125rem; flex-shrink: 0;">⚙️</span>
+            <p style="font-size: 0.8125rem; color: var(--text-secondary); margin: 0; line-height: 1.5;">Start with CFG Scale 0.5 — lower values look more natural, higher adhere strictly to prompts.</p>
+          </div>
+          <div style="display: flex; gap: 10px; align-items: flex-start;">
+            <span style="font-size: 1.125rem; flex-shrink: 0;">⭐</span>
+            <p style="font-size: 0.8125rem; color: var(--text-secondary); margin: 0; line-height: 1.5;">Use Pro quality tier for production output, and Standard for testing drafts quickly.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- VIEW: GALLERY (#/gallery) -->
+    <!-- ========================================== -->
+    <div id="view-gallery" class="view-section container" style="padding-top: 48px; padding-bottom: 80px; display: none;">
+      
+      <!-- Gallery Header -->
+      <div style="margin-bottom: 32px;">
+        <div style="display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+          <div>
+            <h1 style="font-size: 2rem; font-weight: 800; letter-spacing: -0.03em; color: var(--text-primary);">
+              🎬 Task Gallery
+            </h1>
+            <p style="color: var(--text-muted); margin-top: 6px;" id="gallery-count-display">
+              No tasks yet — generate your first video!
+            </p>
+          </div>
+          <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+            <!-- Auto Refresh toggle -->
+            <label class="toggle-wrapper">
+              <span style="font-size: 0.8125rem; color: var(--text-muted);">Auto-refresh</span>
+              <div class="toggle">
+                <input type="checkbox" id="gallery-auto-refresh-toggle" checked />
+                <div class="toggle-track"></div>
+                <div class="toggle-thumb"></div>
+              </div>
+            </label>
+
+            <!-- Manual refresh -->
+            <button type="button" class="btn btn-secondary btn-sm" id="btn-manual-refresh">
+              🔄 Refresh
+            </button>
+
+            <a href="#/generator" class="btn btn-primary btn-sm" id="btn-new-video">+ New Video</a>
+            <button type="button" class="btn btn-danger btn-sm" id="btn-clear-all-tasks" style="display: none;">🗑️ Clear All</button>
+          </div>
+        </div>
+
+        <!-- Active polling indicator banner -->
+        <div id="active-tasks-banner" style="display: none; margin-top: 16px; padding: 12px 16px; background: var(--info-glow); border: 1px solid rgba(59,130,246,0.25); border-radius: var(--radius-md); align-items: center; gap: 10px; font-size: 0.875rem;">
+          <div class="spinner" style="border-top-color: var(--info); width: 16px; height: 16px;"></div>
+          <span style="color: var(--text-secondary);">
+            <span id="active-tasks-count">0</span> task(s) in progress — polling status every 8 seconds.
+          </span>
+        </div>
+      </div>
+
+      <!-- Filters & Sorting row -->
+      <div id="gallery-filters-row" style="display: none; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 24px;">
+        
+        <!-- Filters Tabs -->
+        <div style="display: flex; gap: 4px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 4px; flex-wrap: wrap;">
+          <button type="button" class="btn btn-sm btn-primary" id="filter-btn-ALL" onclick="setGalleryFilter('ALL')">
+            <span>📋</span> <span>All</span>
+            <span id="filter-count-ALL" style="display: none; background: rgba(255,255,255,0.2); border-radius: var(--radius-full); padding: 1px 6px; font-size: 0.7rem; font-weight: 700; margin-left: 4px;"></span>
+          </button>
+          <button type="button" class="btn btn-sm btn-ghost" id="filter-btn-IN_PROGRESS" onclick="setGalleryFilter('IN_PROGRESS')">
+            <span>⚡</span> <span>Processing</span>
+            <span id="filter-count-IN_PROGRESS" style="display: none; background: var(--bg-elevated); border-radius: var(--radius-full); padding: 1px 6px; font-size: 0.7rem; font-weight: 700; margin-left: 4px;"></span>
+          </button>
+          <button type="button" class="btn btn-sm btn-ghost" id="filter-btn-CREATED" onclick="setGalleryFilter('CREATED')">
+            <span>🕐</span> <span>Queued</span>
+            <span id="filter-count-CREATED" style="display: none; background: var(--bg-elevated); border-radius: var(--radius-full); padding: 1px 6px; font-size: 0.7rem; font-weight: 700; margin-left: 4px;"></span>
+          </button>
+          <button type="button" class="btn btn-sm btn-ghost" id="filter-btn-COMPLETED" onclick="setGalleryFilter('COMPLETED')">
+            <span>✅</span> <span>Completed</span>
+            <span id="filter-count-COMPLETED" style="display: none; background: var(--bg-elevated); border-radius: var(--radius-full); padding: 1px 6px; font-size: 0.7rem; font-weight: 700; margin-left: 4px;"></span>
+          </button>
+          <button type="button" class="btn btn-sm btn-ghost" id="filter-btn-FAILED" onclick="setGalleryFilter('FAILED')">
+            <span>❌</span> <span>Failed</span>
+            <span id="filter-count-FAILED" style="display: none; background: var(--bg-elevated); border-radius: var(--radius-full); padding: 1px 6px; font-size: 0.7rem; font-weight: 700; margin-left: 4px;"></span>
+          </button>
+        </div>
+
+        <!-- Sorting -->
+        <select class="input" id="gallery-sort-select" style="width: auto; padding: 8px 12px; font-size: 0.875rem;">
+          <option value="newest">Newest First</option>
+          <option value="oldest">Oldest First</option>
+        </select>
+      </div>
+
+      <!-- Task Grid Container -->
+      <div id="gallery-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;"></div>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- VIEW: SETTINGS (#/settings) -->
+    <!-- ========================================== -->
+    <div id="view-settings" class="view-section container" style="max-width: 860px; padding-top: 48px; padding-bottom: 80px; display: none;">
+      
+      <!-- Settings Header -->
+      <div style="margin-bottom: 40px;">
+        <h1 style="font-size: 2rem; font-weight: 800; letter-spacing: -0.03em; color: var(--text-primary);">
+          ⚙️ Settings
+        </h1>
+        <p style="color: var(--text-muted); margin-top: 8px;">
+          Configure your API keys and application preferences.
+        </p>
+      </div>
+
+      <!-- Settings Sub-tabs -->
+      <div style="display: flex; gap: 2px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 6px; margin-bottom: 32px; width: fit-content;">
+        <button type="button" class="btn btn-primary" id="tab-apikeys" onclick="setSettingsTab('apikeys')">🔑 API Keys</button>
+        <button type="button" class="btn btn-ghost" id="tab-about" onclick="setSettingsTab('about')">ℹ️ About</button>
+      </div>
+
+      <!-- ── Sub-tab Content: API Keys Manager ── -->
+      <div id="settings-apikeys-panel">
+        
+        <!-- Keys Title & Toolbar -->
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">🔑 API Key Management</h2>
+            <p class="section-subtitle">
+              Add and manage your Magnific API keys. Keys are stored locally in your browser.
+            </p>
+          </div>
+          <div style="display: flex; gap: 8px; margin-top: 10px; align-items: center;">
+            <button type="button" class="btn btn-secondary btn-sm" id="btn-toggle-import">📥 Import</button>
+            <button type="button" class="btn btn-secondary btn-sm" id="btn-export-keys" style="display: none;">📤 Export</button>
+            <button type="button" class="btn btn-primary btn-sm" onclick="openKeyModal()">+ Add API Key</button>
+          </div>
+        </div>
+
+        <!-- Import panel (Hidden) -->
+        <div class="card" id="import-keys-panel" style="display: none; padding: 20px; margin-bottom: 20px;">
+          <p style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 10px;">
+            Paste JSON array of API keys: <code style="font-size: 0.8rem; color: var(--primary-light);">[{"name":"...", "key":"..."}]</code>
+          </p>
+          <textarea class="input textarea" id="import-keys-json" rows="5" placeholder='[{"name": "My Pro Key", "key": "mag_xxxxxxxxxx", "isActive": true}]'></textarea>
+          <div style="display: flex; gap: 8px; margin-top: 12px;">
+            <button type="button" class="btn btn-primary btn-sm" id="btn-import-submit">Import</button>
+            <button type="button" class="btn btn-ghost btn-sm" id="btn-import-cancel">Cancel</button>
+          </div>
+        </div>
+
+        <!-- Keys List grid -->
+        <div style="display: flex; flex-direction: column; gap: 12px;" id="keys-list-container"></div>
+
+        <!-- How to get API Key card -->
+        <div class="card" style="padding: 24px; margin-top: 24px;">
+          <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 16px; color: var(--text-primary);">
+            📖 How to get your Magnific API Key
+          </h3>
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            <div style="display: flex; align-items: flex-start; gap: 12px;">
+              <div style="width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0; background: var(--primary-glow2); border: 1px solid var(--border-active); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; color: var(--primary-light);">1</div>
+              <p style="font-size: 0.875rem; color: var(--text-secondary); margin: 3px 0 0;">Visit magnific.com/api and register for an API subscription.</p>
+            </div>
+            <div style="display: flex; align-items: flex-start; gap: 12px;">
+              <div style="width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0; background: var(--primary-glow2); border: 1px solid var(--border-active); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; color: var(--primary-light);">2</div>
+              <p style="font-size: 0.875rem; color: var(--text-secondary); margin: 3px 0 0;">Go to the Developer Dashboard → API Keys tab.</p>
+            </div>
+            <div style="display: flex; align-items: flex-start; gap: 12px;">
+              <div style="width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0; background: var(--primary-glow2); border: 1px solid var(--border-active); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; color: var(--primary-light);">3</div>
+              <p style="font-size: 0.875rem; color: var(--text-secondary); margin: 3px 0 0;">Click "Create API Key", write down a descriptive label, and copy the secret key.</p>
+            </div>
+            <div style="display: flex; align-items: flex-start; gap: 12px;">
+              <div style="width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0; background: var(--primary-glow2); border: 1px solid var(--border-active); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; color: var(--primary-light);">4</div>
+              <p style="font-size: 0.875rem; color: var(--text-secondary); margin: 3px 0 0;">Paste the key in this settings portal and mark it active.</p>
+            </div>
+          </div>
+          <a href="https://www.magnific.com/developers/dashboard/api-key" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm" style="margin-top: 16px; display: inline-flex;">Get API Key ↗</a>
+        </div>
+
+      </div>
+
+      <!-- ── Sub-tab Content: About App Info ── -->
+      <div id="settings-about-panel" style="display: none;">
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+          
+          <!-- App Info Card -->
+          <div class="card" style="padding: 28px;">
+            <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 24px;">
+              <div style="width: 56px; height: 56px; background: linear-gradient(135deg, var(--primary), var(--accent)); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 1.75rem; box-shadow: 0 0 24px var(--primary-glow);">
+                🎯
+              </div>
+              <div>
+                <h2 style="color: var(--text-primary); font-weight: 800; font-size: 1.25rem;">Motion Control</h2>
+                <p style="color: var(--text-muted); font-size: 0.875rem;">AI Motion Transfer Platform</p>
+              </div>
+            </div>
+
+            <div class="about-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+              <div style="padding: 12px 16px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-md);">
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.06em;">Version</div>
+                <div style="font-size: 0.9375rem; font-weight: 600; color: var(--text-primary);">1.0.0 (Hybrid Static)</div>
+              </div>
+              <div style="padding: 12px 16px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-md);">
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.06em;">AI Model</div>
+                <div style="font-size: 0.9375rem; font-weight: 600; color: var(--text-primary);">Kling v3 Motion Control</div>
+              </div>
+              <div style="padding: 12px 16px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-md);">
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.06em;">API Provider</div>
+                <div style="font-size: 0.9375rem; font-weight: 600; color: var(--text-primary);">Magnific Developer API</div>
+              </div>
+              <div style="padding: 12px 16px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-md);">
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.06em;">Backend Proxy</div>
+                <div style="font-size: 0.9375rem; font-weight: 600; color: var(--text-primary);">Vercel Serverless (Optional)</div>
+              </div>
+              <div style="padding: 12px 16px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-md);">
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.06em;">Local Mode</div>
+                <div style="font-size: 0.9375rem; font-weight: 600; color: var(--text-primary);">Direct Client + CORS Proxy</div>
+              </div>
+              <div style="padding: 12px 16px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-md);">
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.06em;">State Storage</div>
+                <div style="font-size: 0.9375rem; font-weight: 600; color: var(--text-primary);">Local Browser Storage</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Format Limits -->
+          <div class="card" style="padding: 28px;">
+            <h3 style="font-size: 1rem; font-weight: 700; color: var(--text-primary); margin-bottom: 20px;">
+              📋 Supported Formats & Limits
+            </h3>
+            <div class="about-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+              <div>
+                <h4 style="font-size: 0.875rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 10px;">🖼️ Character Image</h4>
+                <div style="display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 0.8125rem;">
+                  <span style="color: var(--text-muted);">Formats</span>
+                  <span style="color: var(--text-primary); font-weight: 500;">JPG, JPEG, PNG, WEBP</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 0.8125rem;">
+                  <span style="color: var(--text-muted);">Min Dimensions</span>
+                  <span style="color: var(--text-primary); font-weight: 500;">300 × 300 px</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 0.8125rem;">
+                  <span style="color: var(--text-muted);">Max File Size</span>
+                  <span style="color: var(--text-primary); font-weight: 500;">10 MB</span>
+                </div>
+              </div>
+              <div>
+                <h4 style="font-size: 0.875rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 10px;">🎬 Reference Video</h4>
+                <div style="display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 0.8125rem;">
+                  <span style="color: var(--text-muted);">Formats</span>
+                  <span style="color: var(--text-primary); font-weight: 500;">MP4, MOV, WEBM, M4V</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 0.8125rem;">
+                  <span style="color: var(--text-muted);">Duration Range</span>
+                  <span style="color: var(--text-primary); font-weight: 500;">3 – 30 seconds</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 0.8125rem;">
+                  <span style="color: var(--text-muted);">Max File Size</span>
+                  <span style="color: var(--text-primary); font-weight: 500;">50 MB</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Privacy Card -->
+          <div class="card" style="padding: 24px; border: 1px solid rgba(99, 102, 241, 0.2);">
+            <div style="display: flex; gap: 12px;">
+              <span style="font-size: 1.25rem;">🔒</span>
+              <div>
+                <h4 style="font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">Privacy & Security</h4>
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                  <p style="font-size: 0.8125rem; color: var(--text-secondary); display: flex; gap: 8px; align-items: flex-start;">
+                    <span style="color: var(--success);">✓</span> API keys are stored purely in your browser localStorage and never collected by our servers.
+                  </p>
+                  <p style="font-size: 0.8125rem; color: var(--text-secondary); display: flex; gap: 8px; align-items: flex-start;">
+                    <span style="color: var(--success);">✓</span> File uploads are sent directly to tmpfiles.org via standard browser connection.
+                  </p>
+                  <p style="font-size: 0.8125rem; color: var(--text-secondary); display: flex; gap: 8px; align-items: flex-start;">
+                    <span style="color: var(--success);">✓</span> All generations, logs, and parameters are stored inside your browser cache history.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- API Key Add/Edit Modal Backdrop -->
+  <div id="key-modal" class="modal-backdrop" style="display: none;">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <h3 id="modal-title" style="color: var(--text-primary); margin: 0;">🔑 Add New API Key</h3>
+          <p id="modal-subtitle" style="color: var(--text-muted); font-size: 0.875rem; margin: 4px 0 0;">Enter your Magnific API key details</p>
+        </div>
+        <button type="button" class="btn btn-ghost btn-icon" id="btn-close-modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group" style="margin-bottom: 20px;">
+          <label class="form-label">Key Name / Label</label>
+          <input type="text" class="input" id="modal-key-name" placeholder="e.g. My Personal Key, Prod API Key..." />
+          <p class="form-hint">A friendly identifier for this key</p>
+        </div>
+        <div class="form-group">
+          <label class="form-label" id="modal-value-label">API Key Value</label>
+          <input type="password" class="input input-password" id="modal-key-value" placeholder="mag_xxxxxxxxxxxxxxxxxxxx" />
+          <p class="form-hint">Paste your key from the developers platform</p>
+        </div>
+        <div style="margin-top: 20px; padding: 12px 16px; background: var(--primary-glow2); border: 1px solid var(--border-active); border-radius: var(--radius-md); font-size: 0.8125rem; color: var(--text-secondary); display: flex; gap: 10px;">
+          <span>🔒</span>
+          <span>Your key is stored securely in your browser cache. It is only sent to verify or process AI video creation request.</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="btn-cancel-modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="btn-save-modal">+ Add Key</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- ========================================== -->
+  <!-- VANILLA JAVASCRIPT STATE & CONTROLLERS -->
+  <!-- ========================================== -->
+  <script>
+    // ── LocalStorage Keys ─────────────────────────────────────────
+    const KEYS_STORAGE = 'mc_api_keys';
+    const TASKS_STORAGE = 'mc_tasks';
+
+    // ── Global App State ──────────────────────────────────────────
+    let currentTier = 'pro';
+    let currentOrientation = 'video';
+    let currentImageUrl = '';
+    let currentVideoUrl = '';
+    
+    let currentFilter = 'ALL';
+    let currentSort = 'newest';
+    let isAutoRefreshEnabled = true;
+    let isBackgroundRefreshing = false;
+    let pollingInterval = null;
+
+    let currentSettingsTab = 'apikeys';
+    let currentEditingKeyId = null;
+    let validatingKeyId = null;
+    let validationResults = {}; // keyId -> true/false
+    let visibleKeys = new Set(); // keyId -> visible
+
+    // Sub-components handles
+    let imageUploadZone = null;
+    let videoUploadZone = null;
+    let openTaskDetails = {}; // taskId -> boolean
+
+    // ── Storage CRUD Functions ────────────────────────────────────
+    function getApiKeys() {
+      try {
+        const raw = localStorage.getItem(KEYS_STORAGE);
+        return raw ? JSON.parse(raw) : [];
+      } catch (e) {
+        console.error("Failed to read API keys", e);
+        return [];
+      }
+    }
+
+    function saveApiKeys(keys) {
+      localStorage.setItem(KEYS_STORAGE, JSON.stringify(keys));
+    }
+
+    function addApiKey(key) {
+      const keys = getApiKeys();
+      const newKey = {
+        id: crypto.randomUUID(),
+        name: key.name.trim(),
+        key: key.key.trim(),
+        isActive: key.isActive || false,
+        createdAt: new Date().toISOString(),
+        usageCount: 0
+      };
+      keys.push(newKey);
+      saveApiKeys(keys);
+      return newKey;
+    }
+
+    function updateApiKey(id, updates) {
+      const keys = getApiKeys();
+      const idx = keys.findIndex(k => k.id === id);
+      if (idx !== -1) {
+        keys[idx] = { ...keys[idx], ...updates };
+        saveApiKeys(keys);
+      }
+    }
+
+    function deleteApiKey(id) {
+      const keys = getApiKeys().filter(k => k.id !== id);
+      saveApiKeys(keys);
+    }
+
+    function getActiveApiKey() {
+      const keys = getApiKeys();
+      return keys.find(k => k.isActive) || keys[0] || null;
+    }
+
+    function incrementKeyUsage(id) {
+      const keys = getApiKeys();
+      const idx = keys.findIndex(k => k.id === id);
+      if (idx !== -1) {
+        keys[idx].usageCount = (keys[idx].usageCount || 0) + 1;
+        keys[idx].lastUsed = new Date().toISOString();
+        saveApiKeys(keys);
+      }
+    }
+
+    function getTasks() {
+      try {
+        const raw = localStorage.getItem(TASKS_STORAGE);
+        return raw ? JSON.parse(raw) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveTasks(tasks) {
+      localStorage.setItem(TASKS_STORAGE, JSON.stringify(tasks));
+    }
+
+    function addTask(task) {
+      const tasks = getTasks();
+      tasks.unshift(task); // newest first
+      saveTasks(tasks);
+    }
+
+    function updateTask(taskId, updates) {
+      const tasks = getTasks();
+      const idx = tasks.findIndex(t => t.taskId === taskId);
+      if (idx !== -1) {
+        tasks[idx] = { ...tasks[idx], ...updates, updatedAt: new Date().toISOString() };
+        saveTasks(tasks);
+      }
+    }
+
+    function deleteTask(id) {
+      const tasks = getTasks().filter(t => t.id !== id);
+      saveTasks(tasks);
+    }
+
+    function clearAllTasks() {
+      localStorage.removeItem(TASKS_STORAGE);
+    }
+
+    // ── Helper escape utilities ───────────────────────────────────
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, '&amp;')
+                        .replace(/</g, '&lt;')
+                        .replace(/>/g, '&gt;')
+                        .replace(/"/g, '&quot;')
+                        .replace(/'/g, '&#039;');
+    }
+
+    // ── Toast Utility ─────────────────────────────────────────────
+    function showToast(type, message) {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      
+      let icon = 'ℹ️';
+      if (type === 'success') icon = '✅';
+      if (type === 'error') icon = '❌';
+
+      toast.innerHTML = `
+        <span class="toast-icon">${icon}</span>
+        <span class="toast-text">${escapeHtml(message)}</span>
+        <button type="button" class="btn btn-ghost btn-icon btn-toast-close" style="padding: 4px; font-size: 12px; flex-shrink: 0;">✕</button>
+      `;
+
+      // Close event
+      toast.querySelector('.btn-toast-close').addEventListener('click', () => {
+        toast.style.animation = 'fade-in 0.2s ease reverse';
+        setTimeout(() => toast.remove(), 200);
+      });
+
+      container.appendChild(toast);
+      
+      // Auto remove
+      setTimeout(() => {
+        if (toast.parentElement) {
+          toast.style.animation = 'fade-in 0.2s ease reverse';
+          setTimeout(() => toast.remove(), 200);
+        }
+      }, 4000);
+    }
+
+    // ── Secure Proxy Fetch Wrapper ────────────────────────────────
+    async function magnificFetch(url, options = {}) {
+      const isLocalFile = window.location.protocol === 'file:';
+      
+      const isGenerateCall = url.includes('/ai/video/kling-v3-motion-control-pro') || url.includes('/ai/video/kling-v3-motion-control-std');
+      const isStatusCall = url.includes('/kling-v3-motion-control-pro/') || url.includes('/kling-v3-motion-control-std/');
+      const isValidateCall = url.includes('/v1/ai/video/kling-v3-motion-control-pro') && options.method === 'GET';
+
+      // 1. Attempt Vercel Serverless Function proxy first (if not local file)
+      if (!isLocalFile) {
+        try {
+          let vercelUrl = '';
+          let vercelOptions = { ...options };
+          
+          if (isGenerateCall && options.method === 'POST') {
+            vercelUrl = '/api/generate';
+            // The frontend creates the raw magnific payload (snake_case). We need to map it to what vercel expects (camelCase)
+            // Or, simply pass the raw payload and let Vercel handle it. We will pass a mapped payload for safety.
+            const rawBody = JSON.parse(options.body);
+            vercelOptions.body = JSON.stringify({
+              imageUrl: rawBody.image_url,
+              videoUrl: rawBody.video_url,
+              characterOrientation: rawBody.character_orientation,
+              cfgScale: rawBody.cfg_scale,
+              prompt: rawBody.prompt,
+              webhookUrl: rawBody.webhook_url,
+              tier: url.includes('-std') ? 'std' : 'pro',
+              apiKey: options.headers['x-magnific-api-key']
+            });
+            vercelOptions.headers = { 'Content-Type': 'application/json' };
+          } else if (isStatusCall && options.method === 'GET') {
+            const parts = url.split('/');
+            const taskId = parts[parts.length - 1];
+            const tier = url.includes('-std') ? 'std' : 'pro';
+            const apiKey = options.headers['x-magnific-api-key'];
+            vercelUrl = `/api/task?taskId=${taskId}&tier=${tier}&apiKey=${encodeURIComponent(apiKey)}`;
+            vercelOptions.headers = {};
+          } else if (isValidateCall) {
+            vercelUrl = '/api/validate-key';
+            vercelOptions.method = 'POST';
+            vercelOptions.headers = { 'Content-Type': 'application/json' };
+            vercelOptions.body = JSON.stringify({ apiKey: options.headers['x-magnific-api-key'] });
+          }
+          
+          if (vercelUrl) {
+            const res = await fetch(vercelUrl, vercelOptions);
+            if (res.status !== 404) {
+              return res;
+            }
+            console.warn("Vercel proxy returned 404. Falling back to direct CORS fetch...");
+          }
+        } catch (err) {
+          console.warn("Vercel proxy failed. Falling back to direct CORS fetch...", err);
+        }
+      }
+      
+      // 2. Direct browser fetch with automatic CORS Proxy fallback
+      const headers = { ...options.headers };
+      try {
+        const res = await fetch(url, { ...options, headers });
+        return res;
+      } catch (err) {
+        console.warn("Direct fetch failed due to CORS constraint. Attempting via corsproxy.io...", err);
+        const proxiedUrl = `https://corsproxy.io/?${encodeURIComponent(url)}`;
+        try {
+          const res = await fetch(proxiedUrl, { ...options, headers });
+          return res;
+        } catch (proxyErr) {
+          console.error("CORS proxy lookup failed:", proxyErr);
+          throw new Error("API request failed (CORS blocked direct request, proxy failed). Please check your internet connection.");
+        }
+      }
+    }
+
+    // ── Direct File Uploader to tmpfiles.org ──────────────────────
+    async function uploadFileToTmpFiles(file, onProgress) {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', 'https://tmpfiles.org/api/v1/upload', true);
+
+        xhr.upload.onprogress = (event) => {
+          if (event.lengthComputable) {
+            const percentComplete = Math.round((event.loaded / event.total) * 100);
+            onProgress(percentComplete);
+          }
+        };
+
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            try {
+              const response = JSON.parse(xhr.responseText);
+              if (response.status === 'success' && response.data && response.data.url) {
+                // convert standard tmpfiles URL to a direct raw download URL link
+                const rawUrl = response.data.url.replace('https://tmpfiles.org/', 'https://tmpfiles.org/dl/');
+                resolve(rawUrl);
+              } else {
+                reject(new Error(response.message || 'File upload rejected by tmpfiles server.'));
+              }
+            } catch (e) {
+              reject(new Error('Invalid response signature from upload provider.'));
+            }
+          } else {
+            reject(new Error(`Server responded with error status ${xhr.status}.`));
+          }
+        };
+
+        xhr.onerror = () => reject(new Error('Network error occurred during file upload.'));
+        xhr.send(formData);
+      });
+    }
+
+    // ── Upload Zone Component Builder ─────────────────────────────
+    function initUploadZone({ containerId, type, accept, label, hint, onFileReady }) {
+      const container = document.getElementById(containerId);
+      if (!container) return null;
+
+      let mode = 'upload'; // upload | url
+      let previewUrl = '';
+      let fileName = '';
+
+      container.innerHTML = `
+        <div class="input-tabs">
+          <button type="button" class="input-tab active btn-mode-upload" style="outline:none;">📁 Upload File</button>
+          <button type="button" class="input-tab btn-mode-url" style="outline:none;">🔗 Paste URL</button>
+        </div>
+        
+        <div class="mode-upload-container">
+          <div class="upload-zone">
+            <input type="file" accept="${accept}" style="display: none;" class="file-input" />
+            <div class="upload-idle">
+              <span class="upload-icon">${type === 'image' ? '🖼️' : '🎬'}</span>
+              <p class="upload-title">${label}</p>
+              <p class="upload-subtitle">Drag & drop or <span style="color: var(--primary-light); font-weight: 600;">click to browse</span></p>
+              <p class="upload-subtitle" style="margin-top: 6px;">${type === 'image' ? 'JPG, PNG, WEBP · max 10MB' : 'MP4, MOV, WEBM · 3–30 sec · max 50MB'}</p>
+              ${hint ? `<p class="upload-subtitle" style="margin-top: 8px; color: var(--text-faint); font-style: italic;">${hint}</p>` : ''}
+            </div>
+            <div class="upload-loading" style="display: none; flex-direction: column; align-items: center; gap: 12px; padding: 20px 0;">
+              <div class="spinner spinner-lg"></div>
+              <p class="upload-progress-text" style="color: var(--text-secondary); font-size: 0.875rem;">Uploading...</p>
+              <div class="progress-track" style="width: 80%; max-width: 240px;">
+                <div class="progress-fill upload-progress-fill" style="width: 0%;"></div>
+              </div>
+              <span class="upload-progress-percent" style="font-size: 0.75rem; color: var(--primary-light);">0%</span>
+            </div>
+            <div class="upload-preview-container" style="display: none; width: 100%;">
+              <div class="upload-preview">
+                <button type="button" class="upload-clear" title="Remove file">✕</button>
+              </div>
+              <p class="upload-success-text" style="font-size: 0.8125rem; color: var(--success); margin-top: 8px; display: flex; align-items: center; gap: 6px; justify-content: center;">
+                <span>✓</span> <span class="upload-filename-display" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 250px;"></span>
+              </p>
+            </div>
+            <div class="upload-progress-bar style-progress-line" style="width: 0%; display: none;"></div>
+          </div>
+        </div>
+        
+        <div class="mode-url-container" style="display: none;">
+          <div style="display: flex; gap: 8px;">
+            <input type="url" class="input url-input" placeholder="Enter ${type} URL (must be publicly accessible)" style="flex: 1;" />
+            <button type="button" class="btn btn-primary btn-url-apply" style="padding: 10px 14px;">Use URL</button>
+          </div>
+          <div class="url-preview-container" style="display: none; margin-top: 12px;">
+            <div class="upload-preview" style="position: relative;">
+              <button type="button" class="upload-clear btn-url-clear" title="Remove">✕</button>
+            </div>
+          </div>
+        </div>
+        
+        <div class="upload-error-block" style="display: none; margin-top: 8px; padding: 8px 12px; background: var(--error-glow); border: 1px solid rgba(239,68,68,0.25); border-radius: var(--radius-sm); font-size: 0.8125rem; color: var(--error); align-items: center; gap: 6px;">
+          <span>⚠️</span> <span class="error-message-text"></span>
+        </div>
+      `;
+
+      // Grab elements
+      const btnModeUpload = container.querySelector('.btn-mode-upload');
+      const btnModeUrl = container.querySelector('.btn-mode-url');
+      const modeUploadContainer = container.querySelector('.mode-upload-container');
+      const modeUrlContainer = container.querySelector('.mode-url-container');
+      
+      const uploadZone = container.querySelector('.upload-zone');
+      const fileInput = container.querySelector('.file-input');
+      const uploadIdle = container.querySelector('.upload-idle');
+      const uploadLoading = container.querySelector('.upload-loading');
+      const uploadProgressText = container.querySelector('.upload-progress-text');
+      const uploadProgressFill = container.querySelector('.upload-progress-fill');
+      const uploadProgressPercent = container.querySelector('.upload-progress-percent');
+      const uploadPreviewContainer = container.querySelector('.upload-preview-container');
+      const uploadPreview = container.querySelector('.upload-preview');
+      const uploadFilenameDisplay = container.querySelector('.upload-filename-display');
+      const uploadProgressBarLine = container.querySelector('.upload-progress-bar');
+      const uploadClearBtn = uploadPreviewContainer.querySelector('.upload-clear');
+
+      const urlInput = container.querySelector('.url-input');
+      const btnUrlApply = container.querySelector('.btn-url-apply');
+      const urlPreviewContainer = container.querySelector('.url-preview-container');
+      const btnUrlClear = container.querySelector('.btn-url-clear');
+
+      const errorBlock = container.querySelector('.upload-error-block');
+      const errorMsgText = container.querySelector('.error-message-text');
+
+      function showError(msg) {
+        errorMsgText.textContent = msg;
+        errorBlock.style.display = 'flex';
+      }
+
+      function hideError() {
+        errorBlock.style.display = 'none';
+      }
+
+      // Tab selector triggers
+      btnModeUpload.addEventListener('click', () => {
+        mode = 'upload';
+        btnModeUpload.classList.add('active');
+        btnModeUrl.classList.remove('active');
+        modeUploadContainer.style.display = 'block';
+        modeUrlContainer.style.display = 'none';
+        hideError();
+      });
+
+      btnModeUrl.addEventListener('click', () => {
+        mode = 'url';
+        btnModeUpload.classList.remove('active');
+        btnModeUrl.classList.add('active');
+        modeUploadContainer.style.display = 'none';
+        modeUrlContainer.style.display = 'block';
+        hideError();
+      });
+
+      // Browser trigger click
+      uploadZone.addEventListener('click', (e) => {
+        if (previewUrl || fileInput.disabled) return;
+        if (e.target.closest('.upload-clear')) return;
+        fileInput.click();
+      });
+
+      // DND triggers
+      uploadZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        if (previewUrl) return;
+        uploadZone.classList.add('drag-over');
+      });
+
+      uploadZone.addEventListener('dragleave', () => {
+        uploadZone.classList.remove('drag-over');
+      });
+
+      uploadZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadZone.classList.remove('drag-over');
+        if (previewUrl) return;
+        const file = e.dataTransfer.files[0];
+        if (file) handleUpload(file);
+      });
+
+      fileInput.addEventListener('change', () => {
+        const file = fileInput.files[0];
+        if (file) handleUpload(file);
+      });
+
+      function clearUpload() {
+        previewUrl = '';
+        fileName = '';
+        fileInput.value = '';
+        urlInput.value = '';
+        uploadProgressFill.style.width = '0%';
+        uploadProgressBarLine.style.width = '0%';
+        uploadProgressBarLine.style.display = 'none';
+        
+        uploadIdle.style.display = 'block';
+        uploadPreviewContainer.style.display = 'none';
+        uploadLoading.style.display = 'none';
+        urlPreviewContainer.style.display = 'none';
+        uploadZone.classList.remove('has-file');
+        
+        const oldMedia = uploadPreview.querySelector('img, video');
+        if (oldMedia) oldMedia.remove();
+        
+        const urlPreview = urlPreviewContainer.querySelector('.upload-preview');
+        const oldUrlMedia = urlPreview.querySelector('img, video');
+        if (oldUrlMedia) oldUrlMedia.remove();
+
+        onFileReady('');
+        hideError();
+      }
+
+      uploadClearBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        clearUpload();
+      });
+
+      btnUrlClear.addEventListener('click', (e) => {
+        e.stopPropagation();
+        clearUpload();
+      });
+
+      // Public URL apply
+      btnUrlApply.addEventListener('click', () => {
+        const val = urlInput.value.trim();
+        if (!val) { showError('Please enter a URL'); return; }
+        try {
+          new URL(val);
+        } catch {
+          showError('Invalid URL format. Include http:// or https://');
+          return;
+        }
+        hideError();
+        previewUrl = val;
+        
+        const urlPreview = urlPreviewContainer.querySelector('.upload-preview');
+        const oldMedia = urlPreview.querySelector('img, video');
+        if (oldMedia) oldMedia.remove();
+
+        let mediaEl;
+        if (type === 'image') {
+          mediaEl = document.createElement('img');
+          mediaEl.src = val;
+          mediaEl.onerror = () => showError('Could not load image from URL');
+        } else {
+          mediaEl = document.createElement('video');
+          mediaEl.src = val;
+          mediaEl.controls = true;
+          mediaEl.muted = true;
+          mediaEl.playsInline = true;
+          mediaEl.onerror = () => showError('Could not load video reference from URL');
+        }
+        urlPreview.insertBefore(mediaEl, btnUrlClear);
+        urlPreviewContainer.style.display = 'block';
+
+        onFileReady(val);
+      });
+
+      async function handleUpload(file) {
+        hideError();
+        const isCorrectType = type === 'image' ? file.type.startsWith('image/') : file.type.startsWith('video/');
+        if (!isCorrectType) {
+          showError(`Please select a valid ${type} file.`);
+          return;
+        }
+
+        const maxSize = type === 'image' ? 10 * 1024 * 1024 : 50 * 1024 * 1024;
+        if (file.size > maxSize) {
+          showError(`File size exceeds limits. Max allowed: ${type === 'image' ? '10MB' : '50MB'}`);
+          return;
+        }
+
+        fileName = file.name;
+        uploadIdle.style.display = 'none';
+        uploadLoading.style.display = 'flex';
+        uploadProgressPercent.textContent = '0%';
+        uploadProgressFill.style.width = '0%';
+        uploadProgressBarLine.style.width = '0%';
+        uploadProgressBarLine.style.display = 'block';
+
+        try {
+          const publicUrl = await uploadFileToTmpFiles(file, (percent) => {
+            uploadProgressPercent.textContent = `${percent}%`;
+            uploadProgressFill.style.width = `${percent}%`;
+            uploadProgressBarLine.style.width = `${percent}%`;
+            uploadProgressText.textContent = `Uploading ${fileName}...`;
+          });
+
+          uploadLoading.style.display = 'none';
+          uploadProgressBarLine.style.display = 'none';
+          uploadZone.classList.add('has-file');
+
+          previewUrl = publicUrl;
+          uploadFilenameDisplay.textContent = fileName;
+          
+          const oldMedia = uploadPreview.querySelector('img, video');
+          if (oldMedia) oldMedia.remove();
+
+          let mediaEl;
+          if (type === 'image') {
+            mediaEl = document.createElement('img');
+            mediaEl.src = publicUrl;
+          } else {
+            mediaEl = document.createElement('video');
+            mediaEl.src = publicUrl;
+            mediaEl.controls = true;
+            mediaEl.muted = true;
+            mediaEl.playsInline = true;
+          }
+          uploadPreview.insertBefore(mediaEl, uploadClearBtn);
+          uploadPreviewContainer.style.display = 'block';
+
+          onFileReady(publicUrl);
+          showToast('success', `Uploaded "${fileName}" successfully.`);
+        } catch (err) {
+          console.error(err);
+          uploadLoading.style.display = 'none';
+          uploadProgressBarLine.style.display = 'none';
+          uploadIdle.style.display = 'block';
+          showError(err.message || 'Upload failed. Please try again or paste a URL.');
+        }
+      }
+
+      return {
+        clear: clearUpload,
+        setValue: (val) => {
+          clearUpload();
+          if (!val) return;
+          previewUrl = val;
+          urlInput.value = val;
+          
+          mode = 'url';
+          btnModeUpload.classList.remove('active');
+          btnModeUrl.classList.add('active');
+          modeUploadContainer.style.display = 'none';
+          modeUrlContainer.style.display = 'block';
+
+          const urlPreview = urlPreviewContainer.querySelector('.upload-preview');
+          const oldMedia = urlPreview.querySelector('img, video');
+          if (oldMedia) oldMedia.remove();
+
+          let mediaEl;
+          if (type === 'image') {
+            mediaEl = document.createElement('img');
+            mediaEl.src = val;
+          } else {
+            mediaEl = document.createElement('video');
+            mediaEl.src = val;
+            mediaEl.controls = true;
+            mediaEl.muted = true;
+            mediaEl.playsInline = true;
+          }
+          urlPreview.insertBefore(mediaEl, btnUrlClear);
+          urlPreviewContainer.style.display = 'block';
+        }
+      };
+    }
+
+    // ── Router Setup ──────────────────────────────────────────────
+    function initRouter() {
+      const views = {
+        '': 'view-generator',
+        '#': 'view-generator',
+        '#/generator': 'view-generator',
+        '#/gallery': 'view-gallery',
+        '#/settings': 'view-settings'
+      };
+
+      function handleRouteChange() {
+        const hash = window.location.hash || '#/generator';
+        const viewId = views[hash] || 'view-generator';
+
+        // Hide all views
+        document.querySelectorAll('.view-section').forEach(view => {
+          view.style.display = 'none';
+        });
+
+        // Show active view
+        const activeView = document.getElementById(viewId);
+        if (activeView) activeView.style.display = 'block';
+
+        // Update links styling in navbars
+        document.querySelectorAll('.nav-link').forEach(link => {
+          const href = link.getAttribute('href');
+          if (href === hash || (hash === '#/generator' && href === '#/')) {
+            link.classList.add('active');
+          } else {
+            link.classList.remove('active');
+          }
+        });
+
+        // Trigger updates depending on views
+        if (viewId === 'view-generator') {
+          updateGeneratorFormKeys();
+          updateGenerateButtonState();
+        } else if (viewId === 'view-gallery') {
+          renderGallery();
+        } else if (viewId === 'view-settings') {
+          renderSettings();
+        }
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      window.addEventListener('hashchange', handleRouteChange);
+      // Run once at start
+      handleRouteChange();
+    }
+
+    // ── View: Generator Controller ────────────────────────────────
+    function updateGeneratorFormKeys() {
+      const keys = getApiKeys();
+      const select = document.getElementById('generator-active-key');
+      const warning = document.getElementById('no-key-warning');
+      const genBtn = document.getElementById('generate-btn');
+      
+      if (!select) return;
+
+      if (keys.length === 0) {
+        select.style.display = 'none';
+        warning.style.display = 'flex';
+      } else {
+        select.style.display = 'block';
+        warning.style.display = 'none';
+        
+        const activeKey = getActiveApiKey();
+        select.innerHTML = keys.map(k => `
+          <option value="${k.id}" ${activeKey && activeKey.id === k.id ? 'selected' : ''}>
+            ${k.isActive ? '●' : '○'} ${escapeHtml(k.name)} — ${k.key.slice(0, 8)}...${k.key.slice(-4)}
+          </option>
+        `).join('');
+      }
+    }
+
+    function updateGenerateButtonState() {
+      const btn = document.getElementById('generate-btn');
+      const activeKey = getActiveApiKey();
+      const canGenerate = !!currentImageUrl && !!currentVideoUrl && !!activeKey;
+      btn.disabled = !canGenerate;
+    }
+
+    async function handleGenerateSubmit() {
+      const activeKey = getActiveApiKey();
+      if (!activeKey) {
+        showToast('error', 'Please configure an active API key in Settings.');
+        return;
+      }
+
+      const prompt = document.getElementById('generator-prompt').value.trim();
+      const cfgScale = parseFloat(document.getElementById('generator-cfg-scale').value);
+      const webhookUrl = document.getElementById('generator-webhook').value.trim();
+
+      const btn = document.getElementById('generate-btn');
+      const originalHtml = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = `<span class="spinner" style="border-top-color:#fff;"></span> <span>Submitting Task...</span>`;
+
+      showToast('info', 'Contacting Magnific API server...');
+
+      try {
+        const body = {
+          image_url: currentImageUrl,
+          video_url: currentVideoUrl,
+          character_orientation: currentOrientation,
+          cfg_scale: cfgScale
+        };
+
+        if (prompt) body.prompt = prompt;
+        if (webhookUrl) body.webhook_url = webhookUrl;
+
+        const url = `https://api.magnific.com/v1/ai/video/kling-v3-motion-control-${currentTier}`;
+
+        const res = await magnificFetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-magnific-api-key': activeKey.key
+          },
+          body: JSON.stringify(body)
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+          throw new Error(data.message || `Magnific API error: ${res.statusText}`);
+        }
+
+        const taskId = data.task_id || data.id || data.taskId;
+        if (!taskId) throw new Error('No task ID received from API endpoints.');
+
+        // Add task to storage
+        const newTask = {
+          id: crypto.randomUUID(),
+          taskId,
+          status: 'CREATED',
+          tier: currentTier,
+          imageUrl: currentImageUrl,
+          videoUrl: currentVideoUrl,
+          prompt: prompt || undefined,
+          orientation: currentOrientation,
+          cfgScale,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          apiKeyId: activeKey.id
+        };
+
+        addTask(newTask);
+        incrementKeyUsage(activeKey.id);
+
+        showToast('success', `🎉 Video generation queued. ID: ${taskId.slice(0,8)}...`);
+        
+        // Reset generator form
+        document.getElementById('generator-prompt').value = '';
+        document.getElementById('generator-webhook').value = '';
+        document.getElementById('generator-cfg-scale').value = '0.5';
+        document.getElementById('generator-cfg-scale-val').textContent = '0.5';
+        document.getElementById('prompt-counter').textContent = '0/2500';
+        
+        if (imageUploadZone) imageUploadZone.clear();
+        if (videoUploadZone) videoUploadZone.clear();
+        currentImageUrl = '';
+        currentVideoUrl = '';
+
+        // Display recent task notification
+        const alertBanner = document.getElementById('generator-recent-task-banner');
+        document.getElementById('recent-task-id-code').textContent = taskId;
+        alertBanner.style.display = 'flex';
+
+        updateGenerateButtonState();
+        
+        // Trigger quick refresh
+        setTimeout(() => refreshActiveTasksBackground(), 1000);
+      } catch (err) {
+        showToast('error', `Generation failed: ${err.message}`);
+        console.error(err);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
+      }
+    }
+
+    // ── View: Gallery Controller ──────────────────────────────────
+    function setGalleryFilter(filterVal) {
+      currentFilter = filterVal;
+      const filterBtns = ['ALL', 'IN_PROGRESS', 'CREATED', 'COMPLETED', 'FAILED'];
+      filterBtns.forEach(f => {
+        const btn = document.getElementById(`filter-btn-${f}`);
+        if (btn) btn.className = f === filterVal ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-ghost';
+      });
+      renderGallery();
+    }
+
+    function renderGallery() {
+      const tasks = getTasks();
+      const grid = document.getElementById('gallery-grid');
+      const countDisplay = document.getElementById('gallery-count-display');
+      const activeBanner = document.getElementById('active-tasks-banner');
+      const activeCountSpan = document.getElementById('active-tasks-count');
+      const clearBtn = document.getElementById('btn-clear-all-tasks');
+      const newBtn = document.getElementById('btn-new-video');
+      const filtersRow = document.getElementById('gallery-filters-row');
+
+      if (!grid) return;
+
+      const counts = {
+        ALL: tasks.length,
+        IN_PROGRESS: tasks.filter(t => t.status === 'IN_PROGRESS').length,
+        CREATED: tasks.filter(t => t.status === 'CREATED').length,
+        COMPLETED: tasks.filter(t => t.status === 'COMPLETED').length,
+        FAILED: tasks.filter(t => t.status === 'FAILED').length
+      };
+
+      // Set counts inside badges
+      ['ALL', 'IN_PROGRESS', 'CREATED', 'COMPLETED', 'FAILED'].forEach(f => {
+        const countSpan = document.getElementById(`filter-count-${f}`);
+        if (countSpan) {
+          if (counts[f] > 0) {
+            countSpan.textContent = counts[f];
+            countSpan.style.display = 'inline-block';
+          } else {
+            countSpan.style.display = 'none';
+          }
+        }
+      });
+
+      const activeCount = counts.IN_PROGRESS + counts.CREATED;
+      if (activeCount > 0) {
+        activeCountSpan.textContent = activeCount;
+        activeBanner.style.display = 'flex';
+      } else {
+        activeBanner.style.display = 'none';
+      }
+
+      // Filter tasks
+      let filtered = tasks.filter(t => currentFilter === 'ALL' || t.status === currentFilter);
+
+      // Sort tasks
+      filtered.sort((a, b) => {
+        const da = new Date(a.createdAt).getTime();
+        const db = new Date(b.createdAt).getTime();
+        return currentSort === 'newest' ? db - da : da - db;
+      });
+
+      countDisplay.textContent = tasks.length > 0
+        ? `${tasks.length} task${tasks.length === 1 ? '' : 's'} · ${counts.COMPLETED} completed`
+        : 'No tasks yet — generate your first video!';
+
+      if (tasks.length === 0) {
+        clearBtn.style.display = 'none';
+        newBtn.style.display = 'none';
+        filtersRow.style.display = 'none';
+        grid.innerHTML = `
+          <div class="empty-state" style="grid-column: 1 / -1;">
+            <span class="empty-icon">🎬</span>
+            <h2 class="empty-title">No videos generated yet</h2>
+            <p class="empty-desc">
+              Go to the Generator page to upload your character image and reference video to create your first AI motion video.
+            </p>
+            <a href="#/generator" class="btn btn-primary btn-lg">⚡ Start Generating</a>
+          </div>
+        `;
+      } else {
+        clearBtn.style.display = 'inline-flex';
+        newBtn.style.display = 'inline-flex';
+        filtersRow.style.display = 'flex';
+
+        if (filtered.length === 0) {
+          grid.innerHTML = `
+            <div class="empty-state" style="grid-column: 1 / -1;">
+              <span class="empty-icon">🔍</span>
+              <h2 class="empty-title">No tasks match this filter</h2>
+              <p class="empty-desc">Try a different filter status or <button type="button" class="btn btn-ghost btn-sm" onclick="setGalleryFilter('ALL')" style="display: inline; padding: 0 4px;">show all tasks</button></p>
+            </div>
+          `;
+        } else {
+          grid.innerHTML = filtered.map(t => renderTaskCardHtml(t)).join('');
+        }
+      }
+    }
+
+    function renderTaskCardHtml(task) {
+      const statusCfg = {
+        CREATED:     { label: 'Queued',      class: 'badge-created',   icon: '🕐' },
+        IN_PROGRESS: { label: 'Processing',  class: 'badge-progress',  icon: '⚡' },
+        COMPLETED:   { label: 'Completed',   class: 'badge-completed', icon: '✅' },
+        FAILED:      { label: 'Failed',      class: 'badge-failed',    icon: '❌' }
+      }[task.status] || { label: task.status, class: 'badge-created', icon: '🕐' };
+
+      const isActive = task.status === 'IN_PROGRESS' || task.status === 'CREATED';
+      const isCompleted = task.status === 'COMPLETED';
+
+      const formattedDate = new Date(task.createdAt).toLocaleString('en-US', {
+        month: 'short', day: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+      });
+
+      const isOpen = !!openTaskDetails[task.id];
+
+      let mediaHtml = '';
+      if (isCompleted && task.resultUrl) {
+        mediaHtml = `
+          <video src="${task.resultUrl}" loop muted playsInline onmouseenter="this.play()" onmouseleave="this.pause(); this.currentTime=0;" style="cursor: pointer;"></video>
+        `;
+      } else if (task.imageUrl) {
+        mediaHtml = `
+          <img src="${task.imageUrl}" alt="Character Photo" onerror="this.style.display='none';" />
+        `;
+      } else {
+        mediaHtml = `
+          <div class="task-thumbnail-placeholder">
+            <span style="font-size: 2.5rem;">${isActive ? '⏳' : isCompleted ? '🎬' : '❌'}</span>
+            <span>${isActive ? 'Generating...' : isCompleted ? 'No preview' : 'Failed'}</span>
+          </div>
+        `;
+      }
+
+      const activeRing = isActive ? `
+        <div style="position: absolute; inset: 0; border: 2px solid var(--info); border-radius: inherit; animation: pulse-ring 2s ease-in-out infinite; pointer-events: none;"></div>
+      ` : '';
+
+      return `
+        <div class="task-card status-${task.status.toLowerCase().replace('_', '-')}" onclick="toggleTaskDetails('${task.id}')">
+          <div class="task-thumbnail">
+            ${mediaHtml}
+            <div class="task-overlay">
+              ${isCompleted && task.resultUrl ? `<button type="button" onclick="downloadVideo(event, '${task.resultUrl}', '${task.taskId}')" class="btn btn-primary btn-sm" style="backdrop-filter: blur(8px);">⬇ Download</button>` : ''}
+              ${isActive ? `
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                  <div class="spinner" style="border-top-color: #fff;"></div>
+                  <span style="font-size: 0.8125rem; color: #fff; font-weight: 600;">${task.status === 'CREATED' ? 'Queued' : 'Generating...'}</span>
+                </div>
+              ` : ''}
+            </div>
+            ${activeRing}
+            <div style="position: absolute; top: 10px; left: 10px; z-index: 10;">
+              <span class="task-tier-badge ${task.tier === 'pro' ? 'task-tier-pro' : 'task-tier-std'}">
+                ${task.tier === 'pro' ? '⭐ Pro' : '⚡ Std'}
+              </span>
+            </div>
+          </div>
+          
+          <div class="task-info">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+              <span class="badge ${statusCfg.class}">
+                ${isActive ? '<span class="pulse-dot"></span>' : ''}
+                ${statusCfg.icon} ${statusCfg.label}
+              </span>
+              <span style="font-size: 0.75rem; color: var(--text-muted);">${formattedDate}</span>
+            </div>
+            
+            <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 8px;">
+              <span style="font-family: monospace; font-size: 0.75rem; color: var(--text-muted); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                ${task.taskId}
+              </span>
+              <button type="button" class="btn btn-ghost btn-icon" onclick="copyTaskId(event, '${task.taskId}')" style="padding: 4px 6px; font-size: 12px; flex-shrink: 0;">
+                📋
+              </button>
+            </div>
+            
+            ${task.prompt ? `
+              <p style="font-size: 0.8125rem; color: var(--text-muted); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; margin-bottom: 8px; line-height: 1.5;">
+                "${escapeHtml(task.prompt)}"
+              </p>
+            ` : ''}
+            
+            <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px;">
+              <span style="font-size: 0.7rem; color: var(--text-muted); background: var(--bg-elevated); padding: 2px 8px; border-radius: var(--radius-full); border: 1px solid var(--border);">
+                ${task.orientation === 'video' ? '🎬 Video mode' : '🖼️ Image mode'}
+              </span>
+              <span style="font-size: 0.7rem; color: var(--text-muted); background: var(--bg-elevated); padding: 2px 8px; border-radius: var(--radius-full); border: 1px solid var(--border);">
+                CFG ${(task.cfgScale || 0.5).toFixed(1)}
+              </span>
+            </div>
+            
+            ${isOpen ? `
+              <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); font-size: 0.8125rem; display: flex; flex-direction: column; gap: 8px;" onclick="event.stopPropagation()">
+                <div style="display: flex; gap: 8px; align-items: center;">
+                  <span style="color: var(--text-muted); min-width: 80px;">Image URL:</span>
+                  <a href="${task.imageUrl}" target="_blank" rel="noopener noreferrer" style="color: var(--primary-light); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1;">
+                    ${task.imageUrl.startsWith('data:') ? '[Local file url]' : task.imageUrl}
+                  </a>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                  <span style="color: var(--text-muted); min-width: 80px;">Video URL:</span>
+                  <a href="${task.videoUrl}" target="_blank" rel="noopener noreferrer" style="color: var(--primary-light); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1;">
+                    ${task.videoUrl.startsWith('data:') ? '[Local file url]' : task.videoUrl}
+                  </a>
+                </div>
+                ${task.resultUrl ? `
+                  <div style="display: flex; gap: 8px; align-items: center;">
+                    <span style="color: var(--text-muted); min-width: 80px;">Result URL:</span>
+                    <a href="${task.resultUrl}" target="_blank" rel="noopener noreferrer" style="color: var(--success); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1;">
+                      View raw video ↗
+                    </a>
+                  </div>
+                ` : ''}
+                ${task.error ? `
+                  <div style="padding: 8px; background: var(--error-glow); border-radius: var(--radius-sm); color: var(--error);">
+                    Error: ${escapeHtml(task.error)}
+                  </div>
+                ` : ''}
+              </div>
+            ` : ''}
+            
+            <div style="display: flex; gap: 8px; margin-top: auto; padding-top: 12px;" onclick="event.stopPropagation()">
+              ${isCompleted && task.resultUrl ? `<button type="button" class="btn btn-success btn-sm" onclick="downloadVideo(event, '${task.resultUrl}', '${task.taskId}')" style="flex: 1;">⬇ Download</button>` : ''}
+              ${isCompleted && task.resultUrl ? `<a href="${task.resultUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm">▶ View</a>` : ''}
+              <button type="button" class="btn btn-ghost btn-icon btn-sm" onclick="deleteTaskItem(event, '${task.id}')" style="margin-left: auto; color: var(--error);" title="Remove Task">🗑️</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function toggleTaskDetails(id) {
+      openTaskDetails[id] = !openTaskDetails[id];
+      renderGallery();
+    }
+
+    function copyTaskId(e, taskId) {
+      e.stopPropagation();
+      navigator.clipboard.writeText(taskId).then(() => {
+        showToast('success', 'Task ID copied to clipboard');
+      });
+    }
+
+    function downloadVideo(e, url, taskId) {
+      e.stopPropagation();
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `motion-${taskId.slice(0, 8)}.mp4`;
+      a.target = '_blank';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    function deleteTaskItem(e, id) {
+      e.stopPropagation();
+      if (confirm('Remove this task from local history?')) {
+        deleteTask(id);
+        delete openTaskDetails[id];
+        renderGallery();
+        showToast('info', 'Task deleted.');
+      }
+    }
+
+    // Background active tasks lookup
+    async function refreshActiveTasksBackground() {
+      if (isBackgroundRefreshing) return;
+      
+      const allTasks = getTasks();
+      const activeTasks = allTasks.filter(t => t.status === 'CREATED' || t.status === 'IN_PROGRESS');
+      if (activeTasks.length === 0) return;
+
+      const apiKeys = getApiKeys();
+      if (apiKeys.length === 0) return;
+
+      isBackgroundRefreshing = true;
+      
+      const promises = activeTasks.map(async (task) => {
+        // Find key used to generate or fallback
+        const apiKey = apiKeys.find(k => k.id === task.apiKeyId) || apiKeys[0];
+        if (!apiKey) return;
+
+        try {
+          const url = `https://api.magnific.com/v1/ai/video/kling-v3-motion-control-${task.tier}/${task.taskId}`;
+          const res = await magnificFetch(url, {
+            method: 'GET',
+            headers: {
+              'x-magnific-api-key': apiKey.key
+            }
+          });
+
+          if (!res.ok) return;
+
+          const data = await res.json();
+          const newStatus = data.status || task.status;
+          const videoUrl = data.output?.url || data.output?.video_url || data.video_url || data.result_url;
+
+          if (newStatus !== task.status || videoUrl || data.error) {
+            updateTask(task.taskId, {
+              status: newStatus,
+              resultUrl: videoUrl || task.resultUrl,
+              error: data.error
+            });
+            
+            if (newStatus === 'COMPLETED') {
+              showToast('success', `🎉 Video generation completed for task ${task.taskId.slice(0,8)}...`);
+            } else if (newStatus === 'FAILED') {
+              showToast('error', `❌ Task failed: ${data.error || 'Unknown error code.'}`);
+            }
+          }
+        } catch (e) {
+          console.warn(`Polling lookup failed for task ${task.taskId}`, e);
+        }
+      });
+
+      await Promise.allSettled(promises);
+      isBackgroundRefreshing = false;
+      
+      // Update UI if user is on Gallery
+      if (window.location.hash === '#/gallery') {
+        renderGallery();
+      }
+    }
+
+    // ── View: Settings Controller ─────────────────────────────────
+    function setSettingsTab(tabId) {
+      currentSettingsTab = tabId;
+      document.getElementById('tab-apikeys').className = tabId === 'apikeys' ? 'btn btn-primary' : 'btn btn-ghost';
+      document.getElementById('tab-about').className = tabId === 'about' ? 'btn btn-primary' : 'btn btn-ghost';
+      
+      document.getElementById('settings-apikeys-panel').style.display = tabId === 'apikeys' ? 'block' : 'none';
+      document.getElementById('settings-about-panel').style.display = tabId === 'about' ? 'block' : 'none';
+    }
+
+    function renderSettings() {
+      const keys = getApiKeys();
+      const keysContainer = document.getElementById('keys-list-container');
+      const exportBtn = document.getElementById('btn-export-keys');
+
+      if (keys.length === 0) {
+        exportBtn.style.display = 'none';
+        keysContainer.innerHTML = `
+          <div class="empty-state">
+            <span class="empty-icon">🔑</span>
+            <h3 class="empty-title">No API Keys Added</h3>
+            <p class="empty-desc">
+              Add your Magnific API key to start generating motion control videos.
+              Get your key at <a href="https://www.magnific.com/developers/dashboard/api-key" target="_blank" rel="noopener noreferrer">magnific.com</a>
+            </p>
+            <button type="button" class="btn btn-primary" onclick="openKeyModal()">+ Add Your First API Key</button>
+          </div>
+        `;
+      } else {
+        exportBtn.style.display = 'inline-flex';
+        keysContainer.innerHTML = keys.map((key, idx) => {
+          const isActive = key.isActive;
+          const isVal = validationResults[key.id];
+          const valBadge = isVal === true ? '<span class="badge badge-completed">✓ Valid</span>' :
+                           isVal === false ? '<span class="badge badge-failed">✗ Invalid</span>' : '';
+          
+          const isVisible = visibleKeys.has(key.id);
+          const displayKey = isVisible ? key.key : (key.key.slice(0, 6) + '●'.repeat(12) + key.key.slice(-4));
+          
+          return `
+            <div class="api-key-card ${isActive ? 'is-active' : ''}">
+              <div class="api-key-indicator"></div>
+              <div style="flex: 1; min-width: 0;">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px; flex-wrap: wrap;">
+                  <span class="api-key-name">${escapeHtml(key.name)}</span>
+                  ${isActive ? '<span class="badge badge-active">● Active</span>' : ''}
+                  ${valBadge}
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                  <span class="api-key-masked" style="font-family: monospace; color: var(--text-muted);">${escapeHtml(displayKey)}</span>
+                  <button type="button" class="btn btn-ghost btn-icon" style="padding: 2px 6px; font-size: 12px;" onclick="toggleKeyVisibility('${key.id}')" title="${isVisible ? 'Hide' : 'Show'}">
+                    ${isVisible ? '🙈' : '👁️'}
+                  </button>
+                </div>
+                <div class="api-key-meta">
+                  <span>#${idx + 1}</span>
+                  <span>Added ${new Date(key.createdAt).toLocaleDateString()}</span>
+                  ${key.lastUsed ? `<span>Last used ${new Date(key.lastUsed).toLocaleDateString()}</span>` : ''}
+                  <span>Used ${key.usageCount || 0}×</span>
+                </div>
+              </div>
+              <div class="api-key-actions">
+                ${!isActive ? `<button type="button" class="btn btn-secondary btn-sm" onclick="setActiveKey('${key.id}')">Set Active</button>` : ''}
+                <button type="button" class="btn btn-ghost btn-sm" onclick="copyKeyText('${key.key}', '${escapeHtml(key.name)}')" title="Copy key">📋</button>
+                <button type="button" class="btn btn-ghost btn-sm" onclick="testApiKey('${key.id}')" ${validatingKeyId === key.id ? 'disabled' : ''} title="Test key">
+                  ${validatingKeyId === key.id ? '<span class="spinner" style="width: 14px; height: 14px;"></span>' : '🔍 Test'}
+                </button>
+                <button type="button" class="btn btn-ghost btn-sm" onclick="openKeyModal('${key.id}')" title="Edit name/value">✏️</button>
+                <button type="button" class="btn btn-danger btn-icon btn-sm" onclick="deleteKey('${key.id}')" title="Delete key">🗑️</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    function toggleKeyVisibility(id) {
+      if (visibleKeys.has(id)) {
+        visibleKeys.delete(id);
+      } else {
+        visibleKeys.add(id);
+      }
+      renderSettings();
+    }
+
+    function setActiveKey(id) {
+      const keys = getApiKeys();
+      const updated = keys.map(k => ({ ...k, isActive: k.id === id }));
+      saveApiKeys(updated);
+      renderSettings();
+      showToast('success', `Activated key.`);
+    }
+
+    function copyKeyText(key, name) {
+      navigator.clipboard.writeText(key).then(() => {
+        showToast('success', `Copied key "${name}" to clipboard.`);
+      });
+    }
+
+    async function testApiKey(id) {
+      const keys = getApiKeys();
+      const keyObj = keys.find(k => k.id === id);
+      if (!keyObj) return;
+
+      validatingKeyId = id;
+      renderSettings();
+
+      try {
+        const url = 'https://api.magnific.com/v1/ai/video/kling-v3-motion-control-pro';
+        const res = await magnificFetch(url, {
+          method: 'GET',
+          headers: {
+            'x-magnific-api-key': keyObj.key
+          }
+        });
+
+        // 401 is Invalid API Key. Other status codes mean key itself was authenticated.
+        const valid = res.status !== 401;
+        validationResults[id] = valid;
+        
+        if (valid) {
+          showToast('success', `✅ Key "${keyObj.name}" is authenticated!`);
+        } else {
+          showToast('error', `❌ Key "${keyObj.name}" is unauthorized (401).`);
+        }
+      } catch (err) {
+        showToast('error', `Verification failed: ${err.message}`);
+        validationResults[id] = false;
+      } finally {
+        validatingKeyId = null;
+        renderSettings();
+      }
+    }
+
+    function deleteKey(id) {
+      const keys = getApiKeys();
+      const keyObj = keys.find(k => k.id === id);
+      if (!keyObj) return;
+
+      if (confirm(`Are you sure you want to delete API key "${keyObj.name}"?`)) {
+        deleteApiKey(id);
+        delete validationResults[id];
+        visibleKeys.delete(id);
+        renderSettings();
+        showToast('info', `Key "${keyObj.name}" removed.`);
+      }
+    }
+
+    // Modal Add/Edit
+    function openKeyModal(id = null) {
+      const modal = document.getElementById('key-modal');
+      const title = document.getElementById('modal-title');
+      const subtitle = document.getElementById('modal-subtitle');
+      const nameInput = document.getElementById('modal-key-name');
+      const valInput = document.getElementById('modal-key-value');
+      const valLabel = document.getElementById('modal-value-label');
+      const saveBtn = document.getElementById('btn-save-modal');
+      
+      currentEditingKeyId = id;
+
+      if (id) {
+        const keys = getApiKeys();
+        const keyObj = keys.find(k => k.id === id);
+        if (!keyObj) return;
+
+        title.textContent = '✏️ Edit API Key';
+        subtitle.textContent = 'Update the name or replace the key value';
+        nameInput.value = keyObj.name;
+        valInput.value = '';
+        valInput.placeholder = '(unchanged)';
+        valLabel.innerHTML = 'API Key Value <span style="font-weight: 400; color: var(--text-muted); text-transform: none;">(leave blank to keep current)</span>';
+        saveBtn.textContent = 'Save Changes';
+      } else {
+        title.textContent = '🔑 Add New API Key';
+        subtitle.textContent = 'Enter your Magnific API key details';
+        nameInput.value = '';
+        valInput.value = '';
+        valInput.placeholder = 'mag_xxxxxxxxxxxxxxxxxxxx';
+        valLabel.textContent = 'API Key Value';
+        saveBtn.textContent = '+ Add Key';
+      }
+
+      modal.style.display = 'flex';
+      nameInput.focus();
+    }
+
+    function closeKeyModal() {
+      document.getElementById('key-modal').style.display = 'none';
+      currentEditingKeyId = null;
+    }
+
+    function saveKeyModal() {
+      const name = document.getElementById('modal-key-name').value.trim();
+      const val = document.getElementById('modal-key-value').value.trim();
+      
+      if (!name) {
+        showToast('error', 'Key label is required.');
+        return;
+      }
+
+      const keys = getApiKeys();
+
+      if (currentEditingKeyId) {
+        const keyObj = keys.find(k => k.id === currentEditingKeyId);
+        if (!keyObj) return;
+        updateApiKey(currentEditingKeyId, {
+          name,
+          key: val || keyObj.key
+        });
+        showToast('success', `Updated "${name}" API key details.`);
+      } else {
+        if (!val) {
+          showToast('error', 'API Key value is required.');
+          return;
+        }
+        if (val.length < 10) {
+          showToast('error', 'Key looks structurally invalid.');
+          return;
+        }
+        addApiKey({
+          name,
+          key: val,
+          isActive: keys.length === 0
+        });
+        showToast('success', `Successfully added key "${name}".`);
+      }
+
+      closeKeyModal();
+      renderSettings();
+    }
+
+    // Import/Export portal
+    function handleImportKeys() {
+      const json = document.getElementById('import-keys-json').value.trim();
+      if (!json) return;
+
+      try {
+        const parsed = JSON.parse(json);
+        const list = Array.isArray(parsed) ? parsed : [parsed];
+        let imported = 0;
+
+        list.forEach(item => {
+          if (item.name && item.key) {
+            addApiKey({
+              name: item.name,
+              key: item.key,
+              isActive: item.isActive || false
+            });
+            imported++;
+          }
+        });
+
+        if (imported > 0) {
+          showToast('success', `Imported ${imported} API keys.`);
+          document.getElementById('import-keys-json').value = '';
+          document.getElementById('import-keys-panel').style.display = 'none';
+          renderSettings();
+        } else {
+          showToast('error', 'No valid keys structure detected in JSON.');
+        }
+      } catch (e) {
+        showToast('error', 'Invalid JSON syntax format.');
+      }
+    }
+
+    // ── Application Initialization ────────────────────────────────
+    window.addEventListener('DOMContentLoaded', () => {
+      // 1. Initialize Upload Zones
+      imageUploadZone = initUploadZone({
+        containerId: 'image-upload-zone-container',
+        type: 'image',
+        accept: 'image/jpeg,image/jpg,image/png,image/webp',
+        label: 'Drop character photo here',
+        hint: 'The person/character whose appearance will be preserved',
+        onFileReady: (url) => {
+          currentImageUrl = url;
+          updateGenerateButtonState();
+        }
+      });
+
+      videoUploadZone = initUploadZone({
+        containerId: 'video-upload-zone-container',
+        type: 'video',
+        accept: 'video/mp4,video/mov,video/webm',
+        label: 'Drop motion reference video',
+        hint: 'Reference pattern video containing key action motions (3–30 sec)',
+        onFileReady: (url) => {
+          currentVideoUrl = url;
+          updateGenerateButtonState();
+        }
+      });
+
+      // 2. Setup Router
+      initRouter();
+
+      // 3. Global Navbar Scroll trigger styling
+      const navbar = document.getElementById('app-navbar');
+      window.addEventListener('scroll', () => {
+        if (window.scrollY > 10) {
+          navbar.classList.add('scrolled');
+        } else {
+          navbar.classList.remove('scrolled');
+        }
+      });
+
+      // 4. Mobile Menu triggers
+      const mobileBtn = document.getElementById('mobile-menu-btn');
+      const mobileDropdown = document.getElementById('mobile-dropdown-menu');
+      
+      mobileBtn.addEventListener('click', () => {
+        const isOpen = mobileDropdown.style.display !== 'none';
+        mobileDropdown.style.display = isOpen ? 'none' : 'flex';
+        mobileBtn.textContent = isOpen ? '☰' : '✕';
+      });
+
+      mobileDropdown.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', () => {
+          mobileDropdown.style.display = 'none';
+          mobileBtn.textContent = '☰';
+        });
+      });
+
+      // 5. Generator Settings triggers
+      document.getElementById('btn-toggle-advanced').addEventListener('click', () => {
+        const panel = document.getElementById('advanced-settings-panel');
+        const arrow = document.getElementById('advanced-arrow');
+        const isShown = panel.style.display !== 'none';
+        
+        panel.style.display = isShown ? 'none' : 'flex';
+        arrow.style.transform = isShown ? 'none' : 'rotate(180deg)';
+      });
+
+      document.getElementById('tier-btn-pro').addEventListener('click', () => {
+        currentTier = 'pro';
+        document.getElementById('tier-btn-pro').classList.add('active');
+        document.getElementById('tier-btn-std').classList.remove('active');
+      });
+
+      document.getElementById('tier-btn-std').addEventListener('click', () => {
+        currentTier = 'std';
+        document.getElementById('tier-btn-std').classList.add('active');
+        document.getElementById('tier-btn-pro').classList.remove('active');
+      });
+
+      document.getElementById('orient-btn-video').addEventListener('click', () => {
+        currentOrientation = 'video';
+        document.getElementById('orient-btn-video').classList.add('active');
+        document.getElementById('orient-btn-image').classList.remove('active');
+        document.getElementById('orient-hint').textContent = '✅ Best for complex motions like dance, gestures, full-body movements';
+      });
+
+      document.getElementById('orient-btn-image').addEventListener('click', () => {
+        currentOrientation = 'image';
+        document.getElementById('orient-btn-image').classList.add('active');
+        document.getElementById('orient-btn-video').classList.remove('active');
+        document.getElementById('orient-hint').textContent = '✅ Best for camera movements, close-up shots with subtle motion';
+      });
+
+      document.getElementById('generator-cfg-scale').addEventListener('input', (e) => {
+        document.getElementById('generator-cfg-scale-val').textContent = Number(e.target.value).toFixed(1);
+      });
+
+      document.getElementById('generator-prompt').addEventListener('input', (e) => {
+        const len = e.target.value.length;
+        const count = document.getElementById('prompt-counter');
+        count.textContent = `${len}/2500`;
+        count.style.color = len > 2200 ? 'var(--warning)' : 'var(--text-muted)';
+      });
+
+      document.getElementById('generator-active-key').addEventListener('change', (e) => {
+        const keys = getApiKeys();
+        const activeId = e.target.value;
+        const updated = keys.map(k => ({ ...k, isActive: k.id === activeId }));
+        saveApiKeys(updated);
+        updateGeneratorFormKeys();
+        updateGenerateButtonState();
+        showToast('success', 'Switched active API Key.');
+      });
+
+      document.getElementById('generate-btn').addEventListener('click', handleGenerateSubmit);
+
+      // 6. Gallery triggers
+      document.getElementById('gallery-sort-select').addEventListener('change', (e) => {
+        currentSort = e.target.value;
+        renderGallery();
+      });
+
+      document.getElementById('gallery-auto-refresh-toggle').addEventListener('change', (e) => {
+        isAutoRefreshEnabled = e.target.checked;
+        showToast('info', isAutoRefreshEnabled ? 'Auto-refresh polling active.' : 'Auto-refresh disabled.');
+      });
+
+      document.getElementById('btn-manual-refresh').addEventListener('click', async () => {
+        const btn = document.getElementById('btn-manual-refresh');
+        const orig = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = `<span class="spinner" style="width:12px; height:12px; border-width:1.5px;"></span> Polling...`;
+        
+        await refreshActiveTasksBackground();
+        
+        btn.disabled = false;
+        btn.innerHTML = orig;
+        showToast('success', 'Polling refresh complete.');
+      });
+
+      document.getElementById('btn-clear-all-tasks').addEventListener('click', () => {
+        if (confirm('Are you sure you want to clear all tasks history? This cannot be undone.')) {
+          clearAllTasks();
+          openTaskDetails = {};
+          renderGallery();
+          showToast('info', 'Gallery history cleared.');
+        }
+      });
+
+      // 7. Settings Triggers
+      document.getElementById('btn-toggle-import').addEventListener('click', () => {
+        const p = document.getElementById('import-keys-panel');
+        p.style.display = p.style.display === 'none' ? 'block' : 'none';
+      });
+
+      document.getElementById('btn-import-submit').addEventListener('click', handleImportKeys);
+      document.getElementById('btn-import-cancel').addEventListener('click', () => {
+        document.getElementById('import-keys-json').value = '';
+        document.getElementById('import-keys-panel').style.display = 'none';
+      });
+
+      document.getElementById('btn-export-keys').addEventListener('click', () => {
+        const keys = getApiKeys().map(({ name, key, isActive }) => ({ name, key, isActive }));
+        const blob = new Blob([JSON.stringify(keys, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'motion-control-api-keys.json';
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('success', 'Exported API keys file.');
+      });
+
+      // Modal Key triggers
+      document.getElementById('btn-close-modal').addEventListener('click', closeKeyModal);
+      document.getElementById('btn-cancel-modal').addEventListener('click', closeKeyModal);
+      document.getElementById('btn-save-modal').addEventListener('click', saveKeyModal);
+
+      // Close modal on backdrop click
+      document.getElementById('key-modal').addEventListener('click', (e) => {
+        if (e.target.id === 'key-modal') closeKeyModal();
+      });
+
+      // 8. Start Background Polling loop
+      pollingInterval = setInterval(() => {
+        if (isAutoRefreshEnabled) {
+          refreshActiveTasksBackground();
+        }
+      }, 8000);
+
+      // Run initial polling once immediately
+      refreshActiveTasksBackground();
+    });
+  </script>
+</body>
+</html>
